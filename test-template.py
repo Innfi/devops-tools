@@ -1,6 +1,6 @@
 from troposphere import GetAtt, Join, Output, Parameter, Ref, Template
 from troposphere.ec2 import VPC, SecurityGroup, VPCGatewayAttachment, Subnet, InternetGateway, \
-    Route, RouteTable, SubnetRouteTableAssociation
+    Route, RouteTable, SubnetRouteTableAssociation, SecurityGroupRule, Instance, NetworkInterfaceProperty
 
 t = Template()
 
@@ -55,6 +55,45 @@ subnetRouteTableAssociation = t.add_resource(
         'TestSubnetRoute',
         SubnetId=Ref(subnet),
         RouteTableId=Ref(routeTable)
+    )
+)
+
+instanceSecurityGroup = t.add_resource(
+    SecurityGroup(
+        'TestSecurityGroup',
+        GroupDescription='Test SG',
+        SecurityGroupIngress=[
+            SecurityGroupRule(
+                IpProtocol='tcp',
+                FromPort='22',
+                ToPort='22',
+                CidrIp='10.10.0.0/32'
+            ),
+            SecurityGroupRule(
+                IpProtocol='tcp',
+                FromPort='80',
+                ToPort='80',
+                CidrIp='0.0.0.0/0'
+            )
+        ],
+        VpcId=Ref(vpc)
+    )
+)
+
+instance = t.add_resource(
+    Instance(
+        'TestEC2Instance',
+        ImageId='ami-0bea7fd38fabe821a',
+        InstanceType='t2.micro',
+        NetworkInterfaces=[
+            NetworkInterfaceProperty(
+                GroupSet=[Ref(instanceSecurityGroup)],
+                AssociatePublicIpAddress='true',
+                DeviceIndex='0',
+                DeleteOnTermination='true',
+                SubnetId=Ref(subnet)
+            )
+        ]
     )
 )
 
