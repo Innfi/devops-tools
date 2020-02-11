@@ -1,6 +1,7 @@
 from troposphere import GetAtt, Join, Output, Parameter, Ref, Template
 from troposphere.ec2 import VPC, SecurityGroup, VPCGatewayAttachment, Subnet, InternetGateway, \
     Route, RouteTable, SubnetRouteTableAssociation, SecurityGroupRule, Instance, NetworkInterfaceProperty
+from troposphere.rds import DBInstance, DBSubnetGroup
 
 t = Template()
 
@@ -15,8 +16,18 @@ vpc = t.add_resource(
 subnet = t.add_resource(
     Subnet(
         'TestSubnet',
-        CidrBlock='10.10.0.0/24',
-        VpcId=Ref(vpc)
+        CidrBlock='10.10.10.0/24',
+        VpcId=Ref(vpc),
+        AvailabilityZone='ap-northeast-2a'
+    )
+)
+
+subnetDB = t.add_resource(
+    Subnet(
+        'TestDBSubnet',
+        CidrBlock='10.10.20.0/24',
+        VpcId=Ref(vpc),
+        AvailabilityZone='ap-northeast-2b'
     )
 )
 
@@ -96,5 +107,48 @@ instance = t.add_resource(
         ]
     )
 )
+
+dbUser = t.add_parameter(
+    Parameter(
+        "DBUser",
+        Type='String',
+        MinLength='1',
+        MaxLength='16',
+        AllowedPattern='[a-zA-Z][a-zA-Z0-9]*'
+    )
+)
+
+dbPassword = t.add_parameter(
+    Parameter(
+        "DBPassword",
+        Type='String',
+        MinLength='1',
+        MaxLength='41',
+        AllowedPattern='[a-zA-Z09]*'
+    )
+)
+
+dbSubnetGroup = t.add_resource(
+    DBSubnetGroup(
+        "MyDBSubnetGroup",
+        DBSubnetGroupDescription='Available Subnets',
+        SubnetIds=[Ref(subnet), Ref(subnetDB)]
+    )
+)
+
+dbInstanceParam = DBInstance(
+    "TestDB",
+    DBName='test_db',
+    AllocatedStorage='5',
+    DBInstanceClass='db.t2.micro',
+    Engine='MySQL',
+    EngineVersion='5.5',
+    MasterUsername=Ref(dbUser),
+    MasterUserPassword=Ref(dbPassword),
+    DBSubnetGroupName=Ref(dbSubnetGroup),
+    VPCSecurityGroups=[Ref(instanceSecurityGroup)]
+)
+
+dbInstance = t.add_resource(dbInstanceParam)
 
 print(t.to_json())
