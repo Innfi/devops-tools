@@ -3,6 +3,7 @@ from troposphere.ec2 import VPC, SecurityGroup, VPCGatewayAttachment, Subnet, In
     Route, RouteTable, SubnetRouteTableAssociation, SecurityGroupRule, Instance, NetworkInterfaceProperty
 from troposphere.rds import DBInstance, DBSubnetGroup
 from troposphere.dynamodb import Table, KeySchema, AttributeDefinition, ProvisionedThroughput
+import troposphere.elasticache as elasticache
 
 t = Template()
 
@@ -171,6 +172,28 @@ dynamoDbInstace = t.add_resource(
             ReadCapacityUnits=1,
             WriteCapacityUnits=1
         )
+    )
+)
+
+redisClusterSg = t.add_resource(elasticache.SecurityGroup(
+    'TestRedisSG',
+    Description='redis security group'
+))
+
+t.add_resource(elasticache.SecurityGroupIngress(
+    'TestSGIngress',
+    CacheSecurityGroupName=Ref(redisClusterSg),
+    EC2SecurityGroupName=Ref(instanceSecurityGroup)
+))
+
+t.add_resource(elasticache.CacheCluster(
+    "TestRedisCluster",
+    Engine='redis',
+    CacheNodeType='cache.t2.small',
+    NumCacheNodes='1',
+    CacheSecurityGroupNames=[Ref(redisClusterSg)],
+    CacheSubnetGroupName=Ref(subnet),
+    VpcSecurityGroupIds=[Ref(instanceSecurityGroup)]
     )
 )
 
