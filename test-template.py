@@ -2,6 +2,7 @@ from troposphere import GetAtt, Join, Output, Parameter, Ref, Template
 from troposphere.ec2 import VPC, SecurityGroup, VPCGatewayAttachment, Subnet, InternetGateway, \
     Route, RouteTable, SubnetRouteTableAssociation, SecurityGroupRule, Instance, NetworkInterfaceProperty
 from troposphere.rds import DBInstance, DBSubnetGroup
+from troposphere.dynamodb import Table, KeySchema, AttributeDefinition, ProvisionedThroughput
 
 t = Template()
 
@@ -150,5 +151,27 @@ dbInstanceParam = DBInstance(
 )
 
 dbInstance = t.add_resource(dbInstanceParam)
+
+dynamoDbInstace = t.add_resource(
+    Table(
+        "TestDynamoDB",
+        KeySchema=[
+            KeySchema(
+                AttributeName='GameId',
+                KeyType="HASH"
+            )
+        ],
+        AttributeDefinitions=[
+            AttributeDefinition(
+                AttributeName='GameId',
+                AttributeType='N'
+            )
+        ],
+        ProvisionedThroughput=ProvisionedThroughput(
+            ReadCapacityUnits=1,
+            WriteCapacityUnits=1
+        )
+    )
+)
 
 print(t.to_json())
