@@ -4,6 +4,7 @@ from troposphere.ec2 import VPC, SecurityGroup, VPCGatewayAttachment, Subnet, In
 from troposphere.rds import DBInstance, DBSubnetGroup
 from troposphere.dynamodb import Table, KeySchema, AttributeDefinition, ProvisionedThroughput
 import troposphere.elasticache as elasticache
+from troposphere.s3 import Bucket, Private
 
 t = Template()
 
@@ -195,6 +196,10 @@ t.add_resource(elasticache.CacheCluster(
     CacheSubnetGroupName=Ref(subnet),
     VpcSecurityGroupIds=[Ref(instanceSecurityGroup)]
     )
+)
+
+t.add_resource(
+    Bucket("TestBucket", AccessControl=Private)
 )
 
 print(t.to_json())
