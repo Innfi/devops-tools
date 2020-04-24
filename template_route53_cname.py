@@ -6,7 +6,7 @@ t = Template()
 dns_record = t.add_resource(
     RecordSetType(
         "testDNS",
-        HostedZoneName="innfisk.com..",
+        HostedZoneName="innfisk.com.",
         Name="test.innfisk.com.",
         Type="CNAME",
         TTL="100",
