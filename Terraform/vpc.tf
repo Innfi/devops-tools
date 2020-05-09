@@ -1,4 +1,4 @@
-resource "aws_vpc" "test_vpc" {
+resource "aws_vpc" "TestVPC" {
     cidr_block = "172.16.0.0/16"
     instance_tenancy = "dedicated" 
     tags = {
