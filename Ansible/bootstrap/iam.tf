@@ -1,7 +1,3 @@
-provider "aws" {
-    region = "ap-northeast-2"
-}
-
 variable "users" {
     description = "create iam users" 
     type = list 
