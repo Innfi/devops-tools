@@ -1,0 +1,11 @@
+---
+- hosts: localtest
+  remote_user: innfi
+  tasks:
+    - name: test connection
+      ping:
+      remote_user: innfi 
+
+  tasks:
+    - name: some shell commands
+      shell: /bin/ls
