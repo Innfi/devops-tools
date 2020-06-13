@@ -1,0 +1,5 @@
+---
+- hosts: localtest
+  become: yes
+  roles:
+    - helloworld
