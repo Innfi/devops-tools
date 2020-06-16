@@ -1,5 +1,5 @@
 ---
-- hosts: localtest
+- hosts: testinstance
   become: yes
   roles:
-    - helloworld
+    - nodejs
