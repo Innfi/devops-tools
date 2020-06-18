@@ -1,0 +1,19 @@
+---
+# tasks file for codedeploy-agent
+- name: Install codedeploy agent
+  get_url: 
+    url: https://aws-codedeploy-ap-northeast-2.s3.ap-northeast-2.amazonaws.com/latest/install 
+    dest: /home/ubuntu/
+    mode: +x
+
+- name: add Symlinks for Ruby
+  file:
+    src: /usr/local/bin/ruby
+    dest: /usr/bin/ruby2.x
+    owner: ubuntu
+    group: ubuntu
+    state: link
+
+- name: Run Codedeploy Agent Installer
+  become: yes
+  shell: "/home/ubuntu/install auto"

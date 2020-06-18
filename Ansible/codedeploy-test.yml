@@ -1,0 +1,7 @@
+---
+- hosts: testinstance
+  become: yes
+  roles:
+    - role: jobscore.ruby
+      ruby_version: 2.7.1
+    - role: codedeploy-agent
