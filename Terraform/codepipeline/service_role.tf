@@ -38,3 +38,23 @@ resource "aws_iam_role_policy" "codebuild_role_policy" {
 }
 EOF
 }
+
+resource "aws_iam_role" "codedeploy_role" {
+  name = "codedeploy_role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "codedeploy.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
