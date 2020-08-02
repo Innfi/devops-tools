@@ -1,2 +1,4 @@
 Terraform/terraform_bin/*
 *.backup
+*/terraform.tfstate
+*/.terraform

@@ -202,4 +202,4 @@ t.add_resource(
     Bucket("TestBucket", AccessControl=Private)
 )
 
-print(t.to_json())
+print(t.to_yaml())
