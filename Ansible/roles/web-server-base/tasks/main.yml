@@ -1,0 +1,21 @@
+---
+# install nginx / php-fpm
+- name: install nginx
+  apt:
+    state: present
+  with_items:
+    - nginx
+    - php-fpm
+
+# copy local confs to target server
+- name: copy nginx confs
+  copy:
+    - src: files/default
+    - dest: /etc/nginx/sites-available/default
+
+# git credentials
+
+# checkout, pull, restart
+
+- name: restart nginx
+  service: name=nginx state=restarted
