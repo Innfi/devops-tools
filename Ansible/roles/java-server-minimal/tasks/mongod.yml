@@ -1,0 +1,39 @@
+---
+# tasks file for java-server-minimal/
+
+- name: copy mongo bin
+  copy:
+    src: files/mongo-bin.tar.gz
+    dest: /tmp/mongo-bin.tar.gz
+    mode: 0666
+    force: no
+
+- name: create mongo bin directory
+  file:
+    path: /usr/share/mongo-bin
+    state: directory
+
+- name: create data directory
+  file:
+    path: /data/db
+    state: directory
+    owner: '{{ username }}'
+    group: '{{ username }}'
+
+- name: untar
+  unarchive:
+    src: /tmp/mongo-bin.tar.gz
+    dest: /usr/share/mongo-bin
+    creates: /usr/share/mongo-bin
+    remote_src: yes
+
+- name: copy mongod.service
+  copy:
+    src: files/mongod.service
+    dest: /etc/systemd/system/mongod.service
+    mode: 0755
+
+- name: start mongod service
+  systemd:
+    name: mongod
+    state: started

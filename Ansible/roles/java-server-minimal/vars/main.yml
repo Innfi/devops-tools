@@ -1,0 +1,5 @@
+---
+# vars file for java-server-minimal/
+
+username: ubuntu
+dest_archive_path: /tmp/mongo-bin.tar.gz

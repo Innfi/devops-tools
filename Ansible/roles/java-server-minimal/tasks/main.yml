@@ -1,0 +1,11 @@
+---
+# tasks file for java-server-minimal
+
+- name: install nginx
+  apt:
+    state:present
+  with_items:
+    - httpd
+    - nginx
+
+- include_tasks: mongod.yml
