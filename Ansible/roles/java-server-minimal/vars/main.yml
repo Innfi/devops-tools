@@ -3,3 +3,4 @@
 
 username: ubuntu
 dest_archive_path: /tmp/mongo-bin.tar.gz
+repo_cred: username:password

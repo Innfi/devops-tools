@@ -1,0 +1,12 @@
+--- 
+# tasks file for redis 
+
+- name: install redis
+  apt:
+    name: redis
+    state: present
+
+- name: ensure redis service started 
+  systemd:
+    name: redis 
+    state: started

@@ -9,3 +9,6 @@
     - nginx
 
 - include_tasks: mongod.yml
+- include_tasks: redis.yml
+- include_tasks: java.yml
+- include_tasks: node.yml
