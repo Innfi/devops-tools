@@ -7,9 +7,11 @@
     dest: /tmp/setup_12.x
     mode: 0755
     force: no
+  register: setup_downloaded
 
 - name: node repo
   command: /tmp/setup_12.x
+  when: setup_downloaded | changed
 
 - name: install node
   apt:
