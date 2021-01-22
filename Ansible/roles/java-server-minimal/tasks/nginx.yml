@@ -1,0 +1,20 @@
+---
+# tasks file for nginx
+
+- name: install nginx
+  apt:
+    state:present
+  with_items:
+    - httpd
+    - nginx
+
+- name: copy nginx config
+  copy:
+    src: files/https.config
+    dest: /etc/nginx/sites-available
+    mode: 0755
+
+- name: start nginx
+  systemd:
+    name: nginx
+    state: started

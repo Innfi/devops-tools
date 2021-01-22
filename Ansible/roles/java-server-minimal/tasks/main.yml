@@ -1,13 +1,7 @@
 ---
 # tasks file for java-server-minimal
 
-- name: install nginx
-  apt:
-    state:present
-  with_items:
-    - httpd
-    - nginx
-
+- include_tasks: nginx.yml
 - include_tasks: mongod.yml
 - include_tasks: redis.yml
 - include_tasks: java.yml
