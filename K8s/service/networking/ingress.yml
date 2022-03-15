@@ -16,3 +16,10 @@ spec:
             name: my-nginx
             port:
               number: 80
+      - path: /test
+        pathType: Prefix
+        backend:
+          service:
+            name: web
+            port:
+              number: 8080
