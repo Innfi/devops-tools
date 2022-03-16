@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-web-deployment
+spec:
+  selector:
+    matchLabels:
+      app: test-web
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: test-web
+        image: innfi:test-web:0.1.0
+        ports:
+        - containerPort: 80
