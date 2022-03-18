@@ -23,6 +23,7 @@ module "eks" {
 
   vpc_id = module.vpc.vpc_id
   subnet_id_public = module.vpc.subnet_id_public
+  subnet_id_private = module.vpc.subnet_id_private
   cluster_name = var.cluster_name
   sg_id_public = module.vpc.sg_id_public
 }

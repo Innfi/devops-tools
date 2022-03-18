@@ -7,7 +7,12 @@ variable "vpc_id" {
 
 variable "subnet_id_public" {
   description = "public subnet id"
-  type = list
+  type = list(string)
+}
+
+variable "subnet_id_private" {
+  description = "private subnet id"
+  type = list(string)
 }
 
 variable "cluster_name" {

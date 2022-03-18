@@ -33,8 +33,8 @@ resource "aws_eks_cluster" "test-eks-cluster" {
   enabled_cluster_log_type = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
   vpc_config {
-    security_group_ids = [var.sg_id_public]
-    subnet_ids = [] #FIXME
+    security_group_ids = [var.sg_id_public, var.sg_id_private]
+    subnet_ids = var.subnet_id_public
     endpoint_private_access = true
     endpoint_public_access = true
   }

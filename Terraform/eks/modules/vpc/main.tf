@@ -53,6 +53,24 @@ resource "aws_subnet" "public" {
   )
 }
 
+resource "aws_subnet" "private" {
+  count = length(var.subnet_private)
+
+  vpc_id = local.vpc_id
+  availability_zone = var.azs[count.index]
+  cidr_block = var.subnet_private[count.index]
+
+  tags = merge(
+    {
+      "Name" = format("%s-private-%s", var.name, var.azs[count.index])
+    },
+    {
+      "kubernetes.io/cluster${var.cluster_name}" = "shared"
+    },
+  )
+}
+
+
 # routing table
 resource "aws_route_table" "public" {
   count = length(var.azs) 
@@ -74,12 +92,39 @@ resource "aws_route_table" "public" {
   )
 }
 
+resource "aws_route_table" "private" {
+  count = length(var.azs)
+
+  vpc_id = local.vpc_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.this.*.id[count.index]
+  }
+
+  tags = merge(
+    {
+      "Name" = format("%s-private-%s", var.name, var.azs[count.index])
+    },
+    {
+      "kubernetes.io/cluster${var.cluster_name}" = "shared"
+    },
+  )
+}
+
 # route table association
 resource "aws_route_table_association" "public" {
   count = length(var.azs)
 
   subnet_id = aws_subnet.public.*.id[count.index]
   route_table_id = aws_route_table.public.*.id[count.index]
+}
+
+resource "aws_route_table_association" "private" {
+  count = length(var.azs)
+
+  subnet_id = aws_subnet.private.*.id[count.index]
+  route_table_id = aws_route_table.private.*.id[count.index]
 }
 
 # security group

@@ -30,6 +30,15 @@ variable "vpc_public_subnets" {
   ]
 }
 
+variable "vpc_private_subnets" {
+  description = "Private Subnets"
+  type = list(string)
+  default = [
+    "10.0.3.0/24",
+    "10.0.4.0/24",
+  ]
+}
+
 variable "from_port" {
   description = "start port for security group"
   type = number

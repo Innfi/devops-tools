@@ -26,6 +26,11 @@ variable "subnet_public" {
   type = list
 }
 
+variable "subnet_private" {
+  description = "private subnet cidrs"
+  type = list
+}
+
 variable "from_port" {
   description = "start port for security group"
   type = number
