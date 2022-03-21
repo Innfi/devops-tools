@@ -10,6 +10,16 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+imageRedis:
+  repository: redis
+  pullPoilcy: IfNotPresent
+
+# imageWeb:
+#   repository: innfi
+#   pullPoilcy: IfNotPresent
+#   tag: "experimental"
+
+
 imagePullSecrets: []
 nameOverride: "innfis-app"
 fullnameOverride: "innfi"
@@ -38,7 +48,7 @@ securityContext: {}
 
 service:
   type: NodePort #ClusterIP
-  port: 80
+  port: 1330
 
 ingress:
   enabled: false
@@ -69,9 +79,9 @@ resources: {}
   #   memory: 128Mi
 
 autoscaling:
-  enabled: false
+  enabled: true
   minReplicas: 2
-  maxReplicas: 10
+  maxReplicas: 8
   targetCPUUtilizationPercentage: 50
   # targetMemoryUtilizationPercentage: 80
 
