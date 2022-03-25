@@ -25,22 +25,28 @@ resource "aws_iam_role_policy_attachment" "vpc-resource-policy" {
   role = aws_iam_role.eks-cluster-role.name
 }
 
-resource "aws_eks_cluster" "test-eks-cluster" {
-  name = var.cluster_name
-  role_arn = aws_iam_role.eks-cluster-role.arn
-  version = "1.20"
+# resource "aws_eks_cluster" "test-eks-cluster" {
+#   name = var.cluster_name
+#   role_arn = aws_iam_role.eks-cluster-role.arn
+#   version = "1.20"
 
-  enabled_cluster_log_type = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+#   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
-  vpc_config {
-    security_group_ids = [var.sg_id_public, var.sg_id_private]
-    subnet_ids = var.subnet_id_public
-    endpoint_private_access = true
-    endpoint_public_access = true
-  }
+#   vpc_config {
+#     #security_group_ids = [var.sg_id_public, var.sg_id_private]
+#     security_group_ids = [var.sg_id_public]
+#     subnet_ids = var.subnet_id_public
+#     endpoint_private_access = true
+#     endpoint_public_access = true
+#   }
 
-  depends_on = [
-    aws_iam_role_policy_attachment.cluster-policy,
-    aws_iam_role_policy_attachment.vpc-resource-policy
-  ]
-}
+#   depends_on = [
+#     aws_iam_role_policy_attachment.cluster-policy,
+#     aws_iam_role_policy_attachment.vpc-resource-policy
+#   ]
+# }
+
+# TODO
+#- vpc cni
+#- CoreDNS
+#- kube-proxy

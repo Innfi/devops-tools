@@ -1,5 +1,17 @@
 # Input variable definitions 
 
+variable "provider_cred_path" {
+  description = "Shared credential path"
+  type = string
+  default = "~/.aws/credentials"
+}
+
+variable "profile" {
+  description = "AWS profile"
+  type = string
+  default = "InnfisDev"
+}
+
 variable "vpc_name" {
     description = "Name of VPC"
     type = string 

@@ -53,23 +53,46 @@ resource "aws_subnet" "public" {
   )
 }
 
-resource "aws_subnet" "private" {
-  count = length(var.subnet_private)
+# resource "aws_subnet" "private" {
+#   count = length(var.subnet_private)
 
-  vpc_id = local.vpc_id
-  availability_zone = var.azs[count.index]
-  cidr_block = var.subnet_private[count.index]
+#   vpc_id = local.vpc_id
+#   availability_zone = var.azs[count.index]
+#   cidr_block = var.subnet_private[count.index]
 
-  tags = merge(
-    {
-      "Name" = format("%s-private-%s", var.name, var.azs[count.index])
-    },
-    {
-      "kubernetes.io/cluster${var.cluster_name}" = "shared"
-    },
-  )
-}
+#   tags = merge(
+#     {
+#       "Name" = format("%s-private-%s", var.name, var.azs[count.index])
+#     },
+#     {
+#       "kubernetes.io/cluster${var.cluster_name}" = "shared"
+#     },
+#   )
+# }
 
+# # eip for NAT gateway
+# resource "aws_eip" "nat_eip" {
+#   count = length(var.azs)
+
+#   vpc = true
+# }
+
+# # NAT gateway
+# resource "aws_nat_gateway" "this" {
+#   count = length(var.azs)
+
+#   allocation_id = aws_eip.nat_eip.*.id[count.index]
+#   subnet_id = aws_subnet.public.*.id[count.index]
+
+#   tags = merge(
+#     {
+#         "Name" = format("%s-%s", var.name, var.azs[count.index])
+#     },
+#     {
+#       "kubernetes.io/cluster${var.cluster_name}" = "shared"
+#     },
+#   )
+# }
 
 # routing table
 resource "aws_route_table" "public" {
@@ -92,25 +115,25 @@ resource "aws_route_table" "public" {
   )
 }
 
-resource "aws_route_table" "private" {
-  count = length(var.azs)
+# resource "aws_route_table" "private" {
+#   count = length(var.azs)
 
-  vpc_id = local.vpc_id
+#   vpc_id = local.vpc_id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.this.*.id[count.index]
-  }
+#   route {
+#     cidr_block = "0.0.0.0/0"
+#     nat_gateway_id = aws_nat_gateway.this.*.id[count.index]
+#   }
 
-  tags = merge(
-    {
-      "Name" = format("%s-private-%s", var.name, var.azs[count.index])
-    },
-    {
-      "kubernetes.io/cluster${var.cluster_name}" = "shared"
-    },
-  )
-}
+#   tags = merge(
+#     {
+#       "Name" = format("%s-private-%s", var.name, var.azs[count.index])
+#     },
+#     {
+#       "kubernetes.io/cluster${var.cluster_name}" = "shared"
+#     },
+#   )
+# }
 
 # route table association
 resource "aws_route_table_association" "public" {
@@ -120,12 +143,12 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.*.id[count.index]
 }
 
-resource "aws_route_table_association" "private" {
-  count = length(var.azs)
+# resource "aws_route_table_association" "private" {
+#   count = length(var.azs)
 
-  subnet_id = aws_subnet.private.*.id[count.index]
-  route_table_id = aws_route_table.private.*.id[count.index]
-}
+#   subnet_id = aws_subnet.private.*.id[count.index]
+#   route_table_id = aws_route_table.private.*.id[count.index]
+# }
 
 # security group
 resource "aws_security_group" "public" {
@@ -133,7 +156,7 @@ resource "aws_security_group" "public" {
 
   tags = merge(
     {
-      "Name" = format("%s-public-%s", var.name, var.azs[count.index])
+      "Name" = format("%s-public", var.name)
     },
   )
 }
@@ -147,3 +170,20 @@ resource "aws_security_group_rule" "ingress_public" {
   protocol = "tcp"
   cidr_blocks = var.internal_cidrs
 }
+
+# resource "aws_security_group" "private" {
+#   vpc_id = local.vpc_id
+
+#   tags = merge(
+#     {
+#       "Name" = format("%s-private", var.name)
+#     },
+#   )
+# }
+
+# resource "aws_security_group_rule" "ingress_private" {
+#   security_group_id = aws_security_group.private.id
+
+#   type = "ingress" 
+   
+# }

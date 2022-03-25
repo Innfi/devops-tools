@@ -10,12 +10,17 @@ output "subnet_id_public" {
   value = aws_subnet.public.*.id
 }
 
-output "subnet_id_private" {
-  description = "private subnet ids"
-  value = aws_subnet.private.*.id
-}
+# output "subnet_id_private" {
+#   description = "private subnet ids"
+#   value = aws_subnet.private.*.id
+# }
 
 output "sg_id_public" {
   description = "public security group id"
   value = aws_security_group.public.id
 }
+
+# output "sg_id_private" {
+#   description = "private security group id"
+#   value = aws_security_group.private.id
+# }

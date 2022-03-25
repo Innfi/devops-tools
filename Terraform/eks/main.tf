@@ -1,8 +1,10 @@
 # Terraform configuration for eks
 
 provider "aws" {
-  version = "~> 2.0"
+#  version = "~> 2.0"
   region = "ap-northeast-2"
+  shared_credentials_file = var.provider_cred_path
+  profile = var.profile
 }
 
 module "vpc" {
@@ -12,6 +14,7 @@ module "vpc" {
   name = var.vpc_name
   cidr = var.vpc_cidr
   subnet_public = var.vpc_public_subnets
+  subnet_private = var.vpc_private_subnets
   from_port = var.from_port
   to_port = var.to_port
   internal_cidrs = var.internal_cidrs
@@ -23,7 +26,8 @@ module "eks" {
 
   vpc_id = module.vpc.vpc_id
   subnet_id_public = module.vpc.subnet_id_public
-  subnet_id_private = module.vpc.subnet_id_private
+  #subnet_id_private = module.vpc.subnet_id_private
   cluster_name = var.cluster_name
   sg_id_public = module.vpc.sg_id_public
+  #sg_id_private = module.vpc.sg_id_private
 }
