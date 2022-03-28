@@ -25,18 +25,39 @@ resource "aws_iam_role_policy_attachment" "vpc-resource-policy" {
   role = aws_iam_role.eks-cluster-role.name
 }
 
+resource "aws_iam_role" "eks-fargate-role" {
+  name = "eks-fargate-role"
+
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "eks-fargate-pods.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "fargate-policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
+  role = aws_iam_role.eks-fargate-role.name
+}
+
 # resource "aws_eks_cluster" "test-eks-cluster" {
 #   name = var.cluster_name
 #   role_arn = aws_iam_role.eks-cluster-role.arn
-#   version = "1.20"
+#   version = "1.21"
 
 #   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
 #   vpc_config {
-#     #security_group_ids = [var.sg_id_public, var.sg_id_private]
-#     security_group_ids = [var.sg_id_public]
-#     subnet_ids = var.subnet_id_public
-#     endpoint_private_access = true
+#     security_group_ids = var.sg_id_public[*]
+#     subnet_ids = var.subnet_id_public[*]
+#     endpoint_private_access = false
 #     endpoint_public_access = true
 #   }
 
@@ -46,7 +67,23 @@ resource "aws_iam_role_policy_attachment" "vpc-resource-policy" {
 #   ]
 # }
 
-# TODO
-#- vpc cni
-#- CoreDNS
-#- kube-proxy
+# resource "aws_eks_addon" "addon-vpc-cni" {
+#   cluster_name = aws_eks_cluster.test-eks-cluster.name
+#   addon_name = "vpc-cni"
+#   resolve_conflicts = "OVERWRITE"
+#   addon_version = "v1.10.1-eksbuild.1"
+# }
+
+# resource "aws_eks_addon" "addon-coredns" {
+#   cluster_name = aws_eks_cluster.test-eks-cluster.name
+#   addon_name = "coredns"
+#   resolve_conflicts = "OVERWRITE"
+#   addon_version = "v1.8.4-eksbuild.1"
+# }
+
+# resource "aws_eks_addon" "addon-kubeproxy" {
+#   cluster_name = aws_eks_cluster.test-eks-cluster.name
+#   addon_name = "kube-proxy"
+#   resolve_conflicts = "OVERWRITE"
+#   addon_version = "v1.21.2-eksbuild.2"
+# }

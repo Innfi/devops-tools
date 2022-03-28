@@ -1,7 +1,15 @@
 # Terraform configuration for eks
 
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 3.55"
+    }
+  }
+}
+
 provider "aws" {
-#  version = "~> 2.0"
   region = "ap-northeast-2"
   shared_credentials_file = var.provider_cred_path
   profile = var.profile
