@@ -5,6 +5,12 @@ variable "vpc_id" {
   type = string
 }
 
+variable "name" {
+  description = "Name to be used on all the resources as identifier"
+  type = string
+  default = ""
+}
+
 variable "subnet_id_public" {
   description = "public subnet id"
   type = list(string)

@@ -25,6 +25,11 @@ resource "aws_iam_role_policy_attachment" "vpc-resource-policy" {
   role = aws_iam_role.eks-cluster-role.name
 }
 
+resource "aws_iam_role_policy_attachment" "service-policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+  role = aws_iam_role.eks-cluster-role.name
+}
+
 resource "aws_iam_role" "eks-fargate-role" {
   name = "eks-fargate-role"
 
@@ -47,6 +52,26 @@ resource "aws_iam_role_policy_attachment" "fargate-policy" {
   role = aws_iam_role.eks-fargate-role.name
 }
 
+# resource "aws_security_group" "eks-cluster-self" {
+#   vpc_id = var.vpc_id
+
+#   tags = merge(
+#     {
+#       "Name" = format("%s-cluster-self", var.name)
+#     },
+#   )
+# }
+
+# resource "aws_security_group_rule" "ingress_self" {
+#   security_group_id = aws_security_group.eks-cluster-self.id
+
+#   type = "ingress"
+#   from_port = 0
+#   to_port = 0
+#   protocol = -1
+#   source_security_group_id = var.sg_id_public
+# } 
+
 # resource "aws_eks_cluster" "test-eks-cluster" {
 #   name = var.cluster_name
 #   role_arn = aws_iam_role.eks-cluster-role.arn
@@ -55,7 +80,7 @@ resource "aws_iam_role_policy_attachment" "fargate-policy" {
 #   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
 #   vpc_config {
-#     security_group_ids = var.sg_id_public[*]
+#     security_group_ids = [ var.sg_id_public ]
 #     subnet_ids = var.subnet_id_public[*]
 #     endpoint_private_access = false
 #     endpoint_public_access = true
@@ -63,7 +88,8 @@ resource "aws_iam_role_policy_attachment" "fargate-policy" {
 
 #   depends_on = [
 #     aws_iam_role_policy_attachment.cluster-policy,
-#     aws_iam_role_policy_attachment.vpc-resource-policy
+#     aws_iam_role_policy_attachment.vpc-resource-policy,
+#     aws_iam_role_policy_attachment.service-policy
 #   ]
 # }
 
