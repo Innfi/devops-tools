@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { json, Request, Response } from 'express';
 import winston from 'winston';
 import { ElasticsearchTransport } from 'winston-elasticsearch';
 
@@ -12,6 +12,7 @@ const logger: winston.Logger = winston.createLogger({
 });
 
 const app = express();
+app.use(json());
 
 app.get('/', (req: Request, res: Response) => {
 	logger.info(`GET /`);
