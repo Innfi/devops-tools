@@ -1,8 +1,15 @@
 import express, { json, Request, Response } from 'express';
 import winston from 'winston';
 import { ElasticsearchTransport } from 'winston-elasticsearch';
+import dotenv from 'dotenv';
 
-const esUrl = 'http://localhost:9200';
+dotenv.config();
+
+const esUrl = process.env.ES_URL ? process.env.ES_URL :
+	'http://localhost:9200';
+
+console.log(`esUrl: ${esUrl}`);
+
 const esTransport = new ElasticsearchTransport({
 	level: 'info',
 	clientOpts: { node: esUrl },

@@ -75,7 +75,19 @@ services:
       - 5601:5601
     networks:
       - elastic
-    
+  testapp:
+    container_name: testapp
+    image: testapp:0.0.2
+    depends_on:
+      - es01
+      - es02
+      - es03
+    environment:
+      ES_URL: http://es01:9200
+    ports:
+      - 3000:3000
+    networks:
+      - elastic
 
 volumes:
   data01:
