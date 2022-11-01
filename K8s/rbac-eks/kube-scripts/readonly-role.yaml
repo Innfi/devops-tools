@@ -5,5 +5,5 @@ metadata:
   namespace: dev
 rules:
 - apiGroups: ["*"]
-  resource: ["*"]
-  verbs: ["get", "list"]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch"]
