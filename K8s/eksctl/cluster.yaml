@@ -1,0 +1,14 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: innfis-cluster
+  region: ap-northeast-2
+
+nodeGroups:
+  - name: node1
+    instanceType: t3.micro
+    desiredCapacity: 2
+  - name: node2
+    instanceType: t3.micro
+    desiredCapacity: 2
