@@ -1,0 +1,74 @@
+---
+- hosts: es_host
+  become: yes
+  user: ubuntu
+  vars:
+    es_volume_path: /home/ubuntu/esdata
+    es_image: elasticsearch:1.17.6
+  
+  tasks:
+    - name: test connection
+      ping:
+      remote_user: ubuntu
+    
+    - name: install aptitude
+      apt:
+        name: aptitude
+        state: latest
+    
+    - name: install system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python-setuptools
+        state:latest
+    
+    - name: add docker gpg key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    
+    - name: add docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+    
+    - name: install docker module for python
+      pip:
+        name: docker
+
+    - name: pull image
+      community.docker.docker_image:
+        name: "{{es_image}}"
+        source: pull
+    
+    - name: create volume directory
+      file:
+        path: "{{es_volume_path}}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+    
+    - name: run docker image
+      community.docker.docker_container:
+        name: es_single_noe
+        image: "{{es_image}}"
+        state: started
+        env:
+          discovery.type: "single-node"
+        ports:
+          - "9200:9200"
+          - "9300:9300"
+        volumes:
+          - "{{es_volume_path}}:/user/share/elasticsearch/data"
+
