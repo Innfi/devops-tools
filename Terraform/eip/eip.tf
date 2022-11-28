@@ -5,7 +5,7 @@ provider "aws" {
     profile = "InnfisDev"
 }
 
-#assume that we have an ec2 instance and an eip already made, and connect each other
+# assume that we have an ec2 instance and an eip already made, and connect each other
 
 resource "aws_instance" "instance_without_eip" {
     ami = "ami-0bea7fd38fabe821a"
@@ -21,7 +21,7 @@ resource "aws_eip_association" "eip_association" {
     allocation_id = aws_eip.eip_test.id
 }
 
-then create an ec2 instance with eip
+# then create an ec2 instance with eip
 
 resource "aws_instance" "instance_with_eip" {
     ami = "ami-0bea7fd38fabe821a"
