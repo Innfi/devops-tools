@@ -44,15 +44,20 @@ resource "aws_iam_user" "readonly_ennfi" {
   name = "readonly_ennfi"
 }
 
+resource "aws_iam_user" "users" {
+  for_each = var.user_names
+
+  name = each.key
+}
+
 # TODO: provide user list as array
 
 resource "aws_iam_group_membership" "target_group_membership" {
   name = "view_group_membership"
 
-  users = [
-    aws_iam_user.readonly_innfi.name,
-    aws_iam_user.readonly_ennfi.name,
-  ]
+  for_each = var.user_names
+
+  users = each.key
 
   group = aws_iam_group.target_group.name
 }
