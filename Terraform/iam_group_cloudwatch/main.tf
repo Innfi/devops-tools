@@ -33,15 +33,14 @@ resource "aws_iam_policy" "policy_cloudwatch_view" {
 
 resource "aws_iam_group_policy_attachment" "attach_policy_cloudwatch_view" {
   group = aws_iam_group.target_group.name
-  policy_arn = ""
+  policy_arn = aws_iam_policy.policy_cloudwatch_view.arn
 }
 
-resource "aws_iam_user" "readonly_innfi" {
-  name = "readonly_innfi"
-}
+resource "aws_iam_group_policy_attachment" "attach_readonly" {
+  for_each = var.policy_readonly
 
-resource "aws_iam_user" "readonly_ennfi" {
-  name = "readonly_ennfi"
+  group = aws_iam_group.target_group
+  policy_arn = each.key
 }
 
 resource "aws_iam_user" "users" {
@@ -50,14 +49,12 @@ resource "aws_iam_user" "users" {
   name = each.key
 }
 
-# TODO: provide user list as array
-
 resource "aws_iam_group_membership" "target_group_membership" {
   name = "view_group_membership"
 
   for_each = var.user_names
 
-  users = each.key
+  users = tolist(user_names)
 
   group = aws_iam_group.target_group.name
 }
