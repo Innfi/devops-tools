@@ -1,0 +1,6 @@
+namespace: default
+
+nginx:
+  image: nginx
+  replicaCount: 2
+  port: 3000
