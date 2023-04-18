@@ -21,6 +21,12 @@ provider "helm" {
   }
 }
 
+# provider "helm" {
+#   kubernetes {
+#     config_path = "~/.kube/config"
+#   }
+# }
+
 resource "helm_release" "custom_release" {
   name = "custom_release"
   # helm_release = "https://charts.bitnami.com/bitnami"
@@ -30,4 +36,21 @@ resource "helm_release" "custom_release" {
   values = [
     file("${path.module}/chart/values.yaml")
   ]
+}
+
+resource "helm_release" "test" {
+  name = "helm_test"
+  namespace = "default"
+  # repository = ""
+  chart = "./test"
+
+  set {
+    name = "port"
+    value = "3000"
+  }
+
+  set {
+    name = "replicas"
+    value = "2"
+  }
 }
