@@ -1,0 +1,6 @@
+replicaCount: 1
+
+connection:
+  externalPort: 80
+  port: 3000
+  nodePort: 30000

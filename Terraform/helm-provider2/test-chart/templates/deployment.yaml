@@ -1,0 +1,28 @@
+appVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+  labels:
+    app: test
+  namespace: test-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  spec:
+    containers:
+      - name: test
+        image: innfi/test
+        imagePullPolicy: Always
+        ports:
+          - containerPort: {{ .Values.connection.port }}
+            protocol: TCP
+        env:
+          - name: 'TEST_VALUE1'
+            value: 'dev'
+          - name: 'REGION'
+            valueFrom:
+              secretKeyRef:
+                name: test-secret
+                key: AWS_REGION

@@ -1,0 +1,15 @@
+appVersion: v1
+kind: Service
+metadata:
+  name: test
+  labels:
+    app: test
+spec:
+  type: NodePort
+  selector:
+    app: test
+  ports:
+    - protocol: TCP
+      port: {{ .Values.connection.externalPort }}
+      targetPort: {{ .Values.connection.port }}
+      nodePort: {{ .Values.connection.nodePort }}
