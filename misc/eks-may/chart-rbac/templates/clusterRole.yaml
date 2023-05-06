@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: innfismanager
+rules:
+  [
+    {
+      apiGroups: ['*'],
+      resources: [
+        'services',
+        'deployments',
+        'pods',
+        'pods/log',
+        'pods/exec',
+        'configmaps',
+        'secrets',
+        'ingresses',
+        'ingressClasses',
+        'serviceaccounts',
+        'horizontalpodautoscalers'
+      ],
+      verbs: ['get', 'list', 'watch', 'create', 'update', 'patch', 'delete']
+    }
+  ]
