@@ -1,2 +1,7 @@
 target/
 Cargo.lock
+iam/variables.tf
+iam/.terraform
+iam/.terraform.lock.hcl
+iam/terraform.tfstate
+iam/terraform.tfstate.backup

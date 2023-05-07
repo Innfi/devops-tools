@@ -7,5 +7,5 @@ basic e2e test with the starter server
 
 DONE
 --------------------------------------------------------------------------------
-setting up EKS with eksctl with cluster description file
-add update-kubeconfig script
+* add update-kubeconfig script
+* setting up EKS with eksctl with cluster description file
