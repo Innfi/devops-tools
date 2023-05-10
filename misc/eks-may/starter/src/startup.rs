@@ -1,6 +1,7 @@
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpRequest, HttpServer, Responder, HttpResponse};
 use serde::Deserialize;
+use log::{debug, error};
 
 #[derive(Deserialize)]
 struct PostPayload {
@@ -14,11 +15,13 @@ async fn test_post(payload: web::Json<PostPayload>) -> impl Responder {
 
 async fn greet(req: HttpRequest) -> impl Responder {
   let name = req.match_info().get("name").unwrap_or("world");
+  error!("greet] test error msg: {}", name);
 
   format!("hello {}!", &name)
 }
 
 async fn health_check() -> HttpResponse {
+  debug!("health_check");
   HttpResponse::Ok().finish()
 }
 
