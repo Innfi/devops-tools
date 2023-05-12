@@ -9,7 +9,7 @@ struct PostPayload {
   email: String,
 }
 
-async fn test_post(payload: web::Json<PostPayload>) -> impl Responder {
+async fn post_user(payload: web::Json<PostPayload>) -> impl Responder {
   format!("username: {}, email: {}", payload.username, payload.email)
 }
 
@@ -31,7 +31,7 @@ pub fn start_server() -> Result<Server, std::io::Error> {
       .route("/health_check", web::get().to(health_check))
       .route("/", web::get().to(greet))
       .route("/{name}", web::get().to(greet))
-      .route("/user", web::post().to(test_post))
+      .route("/user", web::post().to(post_user))
   })
   .bind("127.0.0.1:8000")?
   .run();
