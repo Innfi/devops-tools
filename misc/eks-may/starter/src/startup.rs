@@ -2,6 +2,9 @@ use actix_web::dev::Server;
 use actix_web::{web, App, HttpRequest, HttpServer, Responder, HttpResponse};
 use serde::Deserialize;
 use log::{debug, error};
+use sqlx::MySqlConnection;
+use chrono::Utc;
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 struct PostPayload {
@@ -9,8 +12,25 @@ struct PostPayload {
   email: String,
 }
 
-async fn post_user(payload: web::Json<PostPayload>) -> impl Responder {
-  format!("username: {}, email: {}", payload.username, payload.email)
+async fn post_user(
+  payload: web::Json<PostPayload>,
+  connection: web::Data<MySqlConnection>,
+) -> impl Responder {
+  format!("username: {}, email: {}", payload.username, payload.email);
+  sqlx::query!(
+    r#"
+    INSERT INTO users(id, username, email, createdAt) 
+    VALUES ($1, $2, $3, $4)
+    "#,
+    Uuid::new_v4(),
+    payload.username,
+    payload.email,
+    Utc::new()
+  )
+  .execute(connection.get_ref())
+  .await;
+
+  HttpResponse::Ok().finish()
 }
 
 async fn greet(req: HttpRequest) -> impl Responder {
@@ -25,13 +45,16 @@ async fn health_check() -> HttpResponse {
   HttpResponse::Ok().finish()
 }
 
-pub fn start_server() -> Result<Server, std::io::Error> {
-  let server = HttpServer::new(|| {
+pub fn start_server(_connection: MySqlConnection) -> Result<Server, std::io::Error> {
+  let connection = web::Data::new(_connection);
+
+  let server = HttpServer::new(move || {
     App::new()
       .route("/health_check", web::get().to(health_check))
       .route("/", web::get().to(greet))
       .route("/{name}", web::get().to(greet))
       .route("/user", web::post().to(post_user))
+      .app_data(connection.clone())
   })
   .bind("127.0.0.1:8000")?
   .run();
