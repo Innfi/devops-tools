@@ -1,11 +1,14 @@
 use std::collections::HashMap;
 use std::env;
+use sqlx::{Connection, MySqlConnection};
 
 use starter;
 
 #[tokio::test]
 async fn initial_e2e_works() {
-  spawn_app();
+  let connection = MySqlConnection::connect(&"mysql://127.0.0.1:3306/innfi")
+    .await.expect("failed to connect to database");
+  spawn_app(connection);
   let client = reqwest::Client::new();
 
   let response = client
@@ -21,7 +24,9 @@ async fn initial_e2e_works() {
 #[tokio::test]
 async fn e2e_post_user() {
   env::set_var("RUST_LOG", "TRACE");
-  spawn_app();
+  let connection = MySqlConnection::connect(&"mysql://127.0.0.1:3306/innfi")
+    .await.expect("failed to connect to database");
+  spawn_app(connection);
   let mut map = HashMap::new();
   map.insert("username", "ennfi");
   map.insert("email", "ennfi@test.io");
@@ -38,8 +43,8 @@ async fn e2e_post_user() {
   assert!(response.status().is_success());
 }
 
-fn spawn_app() {
-  let server = starter::startup::start_server().expect("failed to start_server()");
+fn spawn_app(connection: MySqlConnection) {
+  let server = starter::startup::start_server(connection).expect("failed to start_server()");
 
   let _ = tokio::spawn(server);
 }
