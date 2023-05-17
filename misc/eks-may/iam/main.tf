@@ -19,8 +19,8 @@ resource "aws_iam_group" "manager" {
   name = "innfismanager"
 }
 
-resource "aws_iam_policy" "manager-policy" {
-  name = "manager-policy" 
+resource "aws_iam_policy" "rbac-policy" {
+  name = "rbac-policy" 
 
   policy = jsonencode({
     "Version": "2012-10-17",
@@ -51,7 +51,7 @@ resource "aws_iam_policy" "manager-policy" {
 resource "aws_iam_group_policy_attachment" "manager-policy" {
   group = aws_iam_group.manager.name
 
-  policy_arn = aws_iam_policy.manager-policy.arn
+  policy_arn = aws_iam_policy.rbac-policy.arn
 }
 
 resource "aws_iam_group" "reader" {
@@ -67,5 +67,13 @@ resource "aws_iam_user_group_membership" "manager-group" {
 
   groups = [
     aws_iam_group.manager.name
+  ]
+}
+
+resource "aws_iam_user_group_membership" "reader-group" {
+  user = aws_iam_user.reader.name
+
+  groups = [
+    aws_iam_group.reader.name
   ]
 }
