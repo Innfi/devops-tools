@@ -5,6 +5,7 @@ use log::{debug, error};
 use sqlx::MySqlConnection;
 use chrono::Utc;
 use uuid::Uuid;
+use crate::persistence::DatabaseConnector;
 
 #[derive(Deserialize)]
 struct PostPayload {
@@ -45,8 +46,10 @@ async fn health_check() -> HttpResponse {
   HttpResponse::Ok().finish()
 }
 
-pub fn start_server(_connection: MySqlConnection) -> Result<Server, std::io::Error> {
-  let connection = web::Data::new(_connection);
+pub fn start_server(
+  connector: DatabaseConnector,
+) -> Result<Server, std::io::Error> {
+  let connection = web::Data::new(connector.connection);
 
   let server = HttpServer::new(move || {
     App::new()

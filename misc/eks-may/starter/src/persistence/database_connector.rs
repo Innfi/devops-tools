@@ -1,11 +1,17 @@
+use std::env;
 use sqlx::{Connection, MySqlConnection};
 
 pub struct DatabaseConnector {
-  connection: MysqlConnection,
+  pub connection: MySqlConnection,
 }
 
 impl DatabaseConnector {
-  pub fn init() {
-    toto!();
+  pub async fn new() -> Self {
+    let db_url = env::var("DB_URL").expect("env not found");
+
+    Self {
+      connection: MySqlConnection::connect(&db_url).await
+        .expect("failed to connect to database")
+    }
   }
 }

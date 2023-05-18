@@ -1,7 +1,7 @@
-use starter::startup::start_server;
 use log::info;
 use std::env;
-use sqlx::{Connection, MySqlConnection};
+use starter::startup::start_server;
+use starter::persistence::DatabaseConnector;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -11,10 +11,8 @@ async fn main() -> std::io::Result<()> {
 
   info!("main] server");
 
-  let connection = MySqlConnection::connect(&"mysql://127.0.0.1:3306/innfi")
-    .await.expect("failed to connect to database");
-
-  let _ = start_server(connection)?.await;
+  let connector = DatabaseConnector::new().await;
+  let _ = start_server(connector)?.await;
 
   Ok(())
 }
