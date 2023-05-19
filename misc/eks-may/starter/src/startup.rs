@@ -4,7 +4,7 @@ use serde::Deserialize;
 use log::{debug, error};
 use sqlx::MySqlConnection;
 use chrono::Utc;
-use uuid::Uuid;
+
 use crate::persistence::DatabaseConnector;
 
 #[derive(Deserialize)]
@@ -18,15 +18,12 @@ async fn post_user(
   connection: web::Data<MySqlConnection>,
 ) -> impl Responder {
   format!("username: {}, email: {}", payload.username, payload.email);
+
   sqlx::query!(
-    r#"
-    INSERT INTO users(id, username, email, createdAt) 
-    VALUES ($1, $2, $3, $4)
-    "#,
-    Uuid::new_v4(),
+    r#"INSERT INTO users(username, email, createdAt) VALUES (?, ?, ?)"#,
     payload.username,
     payload.email,
-    Utc::new()
+    Utc::now()
   )
   .execute(connection.get_ref())
   .await;
