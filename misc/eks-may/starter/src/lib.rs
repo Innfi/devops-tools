@@ -1,3 +1,3 @@
+pub mod bootstrap;
+pub mod domain;
 pub mod persistence;
-pub mod user;
-pub mod startup;

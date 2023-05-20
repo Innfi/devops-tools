@@ -1,3 +1,3 @@
-mod database_connector;
+mod connector;
 
-pub use database_connector::*;
+pub use connector::*;

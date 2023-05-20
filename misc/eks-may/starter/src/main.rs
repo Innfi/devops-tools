@@ -1,7 +1,6 @@
 use log::info;
+use starter::bootstrap::run_server;
 use std::env;
-use starter::startup::start_server;
-use starter::persistence::DatabaseConnector;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -11,8 +10,7 @@ async fn main() -> std::io::Result<()> {
 
   info!("main] server");
 
-  let connector = DatabaseConnector::new().await;
-  let _ = start_server(connector)?.await;
+  let _ = run_server()?.await;
 
   Ok(())
 }
