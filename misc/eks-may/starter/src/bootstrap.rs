@@ -1,7 +1,10 @@
 use actix_web::dev::Server;
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpResponse, HttpServer};
 use log::debug;
 use serde::Deserialize;
+
+use crate::domain::{EntityUser, UserService};
+use crate::persistence::DatabaseConnector;
 
 #[derive(Deserialize)]
 struct PostPayload {
@@ -26,8 +29,18 @@ async fn health_check() -> HttpResponse {
   HttpResponse::Ok().finish()
 }
 
-async fn receive_post(payload: web::Json<PostPayload>) -> impl Responder {
-  format!("username: {}, email: {}", payload.username, payload.email);
+async fn receive_post(
+  payload: web::Json<PostPayload>,
+) -> web::Json<EntityUser> {
+  let mut connector: DatabaseConnector = DatabaseConnector::new().await;
+  let mut user_service: UserService = UserService::new(&mut connector);
 
-  HttpResponse::Ok().finish()
+  debug!("receive_post] username: {}, email: {}", payload.username, payload.email);
+
+  let entity_user: EntityUser = user_service
+    .create_user(payload.username.as_str(), payload.email.as_str())
+    .await
+    .expect("failed to create user");
+
+  web::Json(entity_user)
 }
