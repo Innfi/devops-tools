@@ -1,12 +1,13 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use log::debug;
 
 use crate::persistence::DatabaseConnector;
 
 #[derive(Serialize, Deserialize)]
 pub struct EntityUser {
-  pub userid: i64,
+  pub id: i64,
   pub uuid: Uuid,
   pub username: String,
   pub email: String,
@@ -26,6 +27,20 @@ impl<'a> UserService<'a> {
     }
   }
 
+  pub async fn find_user(&mut self, email: &str) -> Result<EntityUser, &'static str> {
+    let entity_user = sqlx::query!(
+      r#"SELECT id, uuid, username, email, created_at FROM users WHERE email=?;"#,
+      email,
+    )
+    .fetch_one(&mut self.db_connector.connection)
+    .await
+    .expect("failed to select user");
+
+    debug!("id: {}, created_at: {}", entity_user.id, entity_user.created_at.unwrap());
+
+    Err("test")
+  }
+
   pub async fn create_user(
     &mut self,
     username: &str,
@@ -38,7 +53,7 @@ impl<'a> UserService<'a> {
     let _ = self.call_create(username, email, uuid).await;
 
     Ok(EntityUser {
-      userid: new_userid,
+      id: new_userid,
       uuid,
       username: String::from(username),
       email: String::from(email),
@@ -52,20 +67,20 @@ impl<'a> UserService<'a> {
     email: &str,
     uuid: Uuid,
   ) -> Result<(), &'static str> {
+    debug!("username: {}, email: {}, uuid: {}", username, email, uuid.to_string());
     let insert_result = sqlx::query!(
       r#"INSERT INTO users(username, email, uuid) VALUES (?, ?, ?);"#,
       username,
       email,
-      uuid
+      "test_uuid"
     )
     .execute(&mut self.db_connector.connection)
-    .await;
+    .await
+    .expect("failed to insert into users");
+    debug!("call_create] ------------------------------ ");
 
-    let is_ok = insert_result.is_ok();
-    if is_ok == true {
-      return Ok(());
-    }
+    debug!("insert id: {}", insert_result.last_insert_id());
 
-    Err("test error")
+    Ok(())
   }
 }
