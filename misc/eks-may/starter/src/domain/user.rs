@@ -1,63 +1,76 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, TimeZone, Utc};
+use log::{debug, error};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-use log::debug;
 
 use crate::persistence::DatabaseConnector;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct EntityUser {
   pub id: i64,
-  pub uuid: Uuid,
   pub username: String,
   pub email: String,
   pub created_at: DateTime<Utc>,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct CreateUserResult {
+  pub msg: String,
+}
+
 pub struct UserService<'a> {
-  userid_counter: i64,
   db_connector: &'a mut DatabaseConnector,
 }
 
 impl<'a> UserService<'a> {
   pub fn new(connector: &'a mut DatabaseConnector) -> Self {
     Self {
-      userid_counter: 0,
       db_connector: connector,
     }
   }
 
-  pub async fn find_user(&mut self, email: &str) -> Result<EntityUser, &'static str> {
-    let entity_user = sqlx::query!(
-      r#"SELECT id, uuid, username, email, created_at FROM users WHERE email=?;"#,
+  pub async fn find_user(
+    &mut self,
+    email: &str,
+  ) -> Result<EntityUser, &'static str> {
+    let select_result = sqlx::query!(
+      r#"SELECT id, username, email, created_at FROM users WHERE email=?;"#,
       email,
     )
     .fetch_one(&mut self.db_connector.connection)
-    .await
-    .expect("failed to select user");
+    .await;
 
-    debug!("id: {}, created_at: {}", entity_user.id, entity_user.created_at.unwrap());
+    if select_result.is_err() {
+      return Err("user not found;");
+    }
 
-    Err("test")
+    let result_object = select_result.unwrap();
+
+    debug!(
+      "id: {}, created_at: {}",
+      result_object.id,
+      result_object.created_at.unwrap()
+    );
+
+    Ok(EntityUser {
+      id: result_object.id,
+      username: result_object.username.unwrap(),
+      email: result_object.email.unwrap(),
+      created_at: Utc.from_utc_datetime(&result_object.created_at.unwrap()),
+    })
   }
 
   pub async fn create_user(
     &mut self,
     username: &str,
     email: &str,
-  ) -> Result<EntityUser, &'static str> {
-    let new_userid = self.userid_counter;
-    self.userid_counter += 1;
+  ) -> Result<CreateUserResult, &'static str> {
+    let _ = self
+      .call_create(username, email)
+      .await
+      .expect("create user failed");
 
-    let uuid = Uuid::new_v4();
-    let _ = self.call_create(username, email, uuid).await;
-
-    Ok(EntityUser {
-      id: new_userid,
-      uuid,
-      username: String::from(username),
-      email: String::from(email),
-      created_at: Utc::now(),
+    Ok(CreateUserResult {
+      msg: format!("create success: {}", email),
     })
   }
 
@@ -65,21 +78,20 @@ impl<'a> UserService<'a> {
     &mut self,
     username: &str,
     email: &str,
-    uuid: Uuid,
   ) -> Result<(), &'static str> {
-    debug!("username: {}, email: {}, uuid: {}", username, email, uuid.to_string());
     let insert_result = sqlx::query!(
-      r#"INSERT INTO users(username, email, uuid) VALUES (?, ?, ?);"#,
+      r#"INSERT INTO users(username, email) VALUES (?, ?);"#,
       username,
       email,
-      "test_uuid"
     )
     .execute(&mut self.db_connector.connection)
     .await
     .expect("failed to insert into users");
-    debug!("call_create] ------------------------------ ");
 
-    debug!("insert id: {}", insert_result.last_insert_id());
+    if insert_result.rows_affected() <= 0 {
+      error!("call_create: insert failed: {}", email);
+      return Err("insert failed");
+    }
 
     Ok(())
   }
