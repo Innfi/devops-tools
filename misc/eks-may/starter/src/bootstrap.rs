@@ -1,6 +1,6 @@
 use actix_web::dev::Server;
 use actix_web::{
-  get, post,
+  get, post, 
   error, web, App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 use log::debug;
@@ -16,6 +16,10 @@ struct UserPayload {
 }
 
 pub fn run_server() -> Result<Server, std::io::Error> {
+  // let mut connector: DatabaseConnector = DatabaseConnector::new().await;
+  // let mut user_service: UserService = UserService::new(&mut connector);
+  // let service_data = Data::new(user_service);
+
   let server = HttpServer::new(move || {
     App::new()
       .route("/", web::get().to(health_check))

@@ -1,0 +1,1 @@
+DB_URL="mysql://innfislocal:test1234@localhost:3306/innfi" cargo run
