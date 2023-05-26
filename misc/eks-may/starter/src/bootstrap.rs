@@ -1,6 +1,6 @@
 use actix_web::dev::Server;
 use actix_web::{
-  get, post, 
+  get, post, Data,
   error, web, App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 use log::debug;
@@ -15,17 +15,19 @@ struct UserPayload {
   email: String,
 }
 
-pub fn run_server() -> Result<Server, std::io::Error> {
-  // let mut connector: DatabaseConnector = DatabaseConnector::new().await;
-  // let mut user_service: UserService = UserService::new(&mut connector);
-  // let service_data = Data::new(user_service);
+pub async fn run_server() -> Result<Server, std::io::Error> {
+  let connector: DatabaseConnector = DatabaseConnector::new().await;
+  let connector_data = web::Data::new(connector);
+  let user_service: UserService = UserService::new(connector_data);
+  let data = web::Data::new(user_service);
+  
 
   let server = HttpServer::new(move || {
     App::new()
       .route("/", web::get().to(health_check))
       .service(create_user)
       .service(find_user)
-      //.app_data()
+      .app_data(data.clone())
   })
   .bind("127.0.0.1:8000")?
   .run();

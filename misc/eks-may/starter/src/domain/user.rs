@@ -1,6 +1,7 @@
 use chrono::{DateTime, TimeZone, Utc};
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
+use actix_web::web::Data;
 
 use crate::persistence::DatabaseConnector;
 
@@ -17,14 +18,14 @@ pub struct CreateUserResult {
   pub msg: String,
 }
 
-pub struct UserService<'a> {
-  db_connector: &'a mut DatabaseConnector,
+pub struct UserService {
+  db_connector: Data<DatabaseConnector>,
 }
 
-impl<'a> UserService<'a> {
-  pub fn new(connector: &'a mut DatabaseConnector) -> Self {
+impl<'a> UserService {
+  pub fn new(connector: Data<DatabaseConnector>) -> Self {
     Self {
-      db_connector: connector,
+      db_connector: connector.clone()
     }
   }
 
@@ -32,10 +33,13 @@ impl<'a> UserService<'a> {
     &mut self,
     email: &str,
   ) -> Result<EntityUser, &'static str> {
+    let mut test = &mut self.db_connector.as_ref().connection;
+
     let select_result = sqlx::query!(
       r#"SELECT id, username, email, created_at FROM users WHERE email=?;"#,
       email,
     )
+    //.fetch_one(&mut self.db_connector.connection)
     .fetch_one(&mut self.db_connector.connection)
     .await;
 
