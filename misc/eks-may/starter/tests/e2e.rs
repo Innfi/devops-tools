@@ -16,8 +16,9 @@ async fn test_health_check() {
 }
 
 async fn spawn_app() {
-  let server =
-    starter::bootstrap::run_server().expect("failed to start server");
+  let server = starter::bootstrap::run_server()
+    .await
+    .expect("failed to start server");
 
   let _ = tokio::spawn(server);
 }

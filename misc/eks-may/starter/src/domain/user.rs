@@ -1,7 +1,7 @@
+use actix_web::web::Data;
 use chrono::{DateTime, TimeZone, Utc};
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
-use actix_web::web::Data;
 
 use crate::persistence::DatabaseConnector;
 
@@ -25,22 +25,19 @@ pub struct UserService {
 impl<'a> UserService {
   pub fn new(connector: Data<DatabaseConnector>) -> Self {
     Self {
-      db_connector: connector.clone()
+      db_connector: connector.clone(),
     }
   }
 
   pub async fn find_user(
-    &mut self,
+    &self,
     email: &str,
   ) -> Result<EntityUser, &'static str> {
-    let mut test = &mut self.db_connector.as_ref().connection;
-
     let select_result = sqlx::query!(
       r#"SELECT id, username, email, created_at FROM users WHERE email=?;"#,
       email,
     )
-    //.fetch_one(&mut self.db_connector.connection)
-    .fetch_one(&mut self.db_connector.connection)
+    .fetch_one(&self.db_connector.connection_pool)
     .await;
 
     if select_result.is_err() {
@@ -64,7 +61,7 @@ impl<'a> UserService {
   }
 
   pub async fn create_user(
-    &mut self,
+    &self,
     username: &str,
     email: &str,
   ) -> Result<CreateUserResult, &'static str> {
@@ -79,7 +76,7 @@ impl<'a> UserService {
   }
 
   async fn call_create(
-    &mut self,
+    &self,
     username: &str,
     email: &str,
   ) -> Result<(), &'static str> {
@@ -88,12 +85,11 @@ impl<'a> UserService {
       username,
       email,
     )
-    .execute(&mut self.db_connector.connection)
-    .await
-    .expect("failed to insert into users");
+    .fetch_one(&self.db_connector.connection_pool)
+    .await;
 
-    if insert_result.rows_affected() <= 0 {
-      error!("call_create: insert failed: {}", email);
+    if insert_result.is_err() {
+      error!("call_create] insert failed: {}", email);
       return Err("insert failed");
     }
 
