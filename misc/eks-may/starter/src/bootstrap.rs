@@ -3,20 +3,12 @@ use actix_web::{
   error, get, post, web, App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 use log::debug;
-use serde::Deserialize;
 
-use crate::domain::{CreateUserResult, EntityUser, UserService};
-use crate::persistence::DatabaseConnector;
+use crate::user::{CreateUserResult, EntityUser, UserPayload, UserService};
 
-#[derive(Deserialize)]
-struct UserPayload {
-  username: String,
-  email: String,
-}
-
-pub async fn run_server() -> Result<Server, std::io::Error> {
-  let user_service = create_user_service_data().await;
-
+pub fn run_server(
+  user_service: web::Data<UserService>,
+) -> Result<Server, std::io::Error> {
   let server = HttpServer::new(move || {
     App::new()
       .route("/", web::get().to(health_check))
@@ -28,12 +20,6 @@ pub async fn run_server() -> Result<Server, std::io::Error> {
   .run();
 
   Ok(server)
-}
-
-async fn create_user_service_data() -> web::Data<UserService> {
-  let connector_data = web::Data::new(DatabaseConnector::new().await);
-
-  return web::Data::new(UserService::new(connector_data));
 }
 
 async fn health_check() -> HttpResponse {
@@ -51,8 +37,8 @@ async fn create_user(
     payload.username, payload.email
   );
 
-  let result = user_service 
-    .create_user(payload.username.as_str(), payload.email.as_str())
+  let result = user_service
+    .create_user(&payload)
     .await
     .expect("failed to create user");
 

@@ -1,8 +1,9 @@
-use actix_web::web::Data;
+use actix_web::web::{self, Data};
 use chrono::{DateTime, TimeZone, Utc};
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
 
+use crate::user::entity::UserPayload;
 use crate::persistence::DatabaseConnector;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -62,34 +63,29 @@ impl<'a> UserService {
 
   pub async fn create_user(
     &self,
-    username: &str,
-    email: &str,
+    payload: &web::Json<UserPayload>,
   ) -> Result<CreateUserResult, &'static str> {
-    let _ = self
-      .call_create(username, email)
-      .await
-      .expect("create user failed");
+    let _ = self.call_create(payload).await.expect("create user failed");
 
     Ok(CreateUserResult {
-      msg: format!("create success: {}", email),
+      msg: format!("create success: {}", payload.email),
     })
   }
 
   async fn call_create(
     &self,
-    username: &str,
-    email: &str,
+    payload: &web::Json<UserPayload>,
   ) -> Result<(), &'static str> {
     let insert_result = sqlx::query!(
       r#"INSERT INTO users(username, email) VALUES (?, ?);"#,
-      username,
-      email,
+      payload.username.as_str(),
+      payload.email.as_str(),
     )
     .fetch_one(&self.db_connector.connection_pool)
     .await;
 
     if insert_result.is_err() {
-      error!("call_create] insert failed: {}", email);
+      error!("call_create] insert failed: {}", payload.email);
       return Err("insert failed");
     }
 
