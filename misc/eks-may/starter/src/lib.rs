@@ -1,3 +1,4 @@
 pub mod bootstrap;
-pub mod user;
+pub mod confs;
 pub mod persistence;
+pub mod user;

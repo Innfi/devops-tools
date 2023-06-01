@@ -3,8 +3,8 @@ use chrono::{DateTime, TimeZone, Utc};
 use log::{debug, error};
 use serde::{Deserialize, Serialize};
 
-use crate::user::entity::UserPayload;
 use crate::persistence::DatabaseConnector;
+use crate::user::entity::UserPayload;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EntityUser {

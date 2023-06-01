@@ -1,1 +1,1 @@
-DB_URL="mysql://innfislocal:test1234@localhost:3306/innfi" cargo run
+DB_URL="mysql://innfislocal:test1234@localhost:3306/innfi" SERVER_ADDR="127.0.0.1:8000" cargo run

@@ -4,9 +4,11 @@ use actix_web::{
 };
 use log::debug;
 
+use crate::confs::Confs;
 use crate::user::{CreateUserResult, EntityUser, UserPayload, UserService};
 
 pub fn run_server(
+  confs: &Confs,
   user_service: web::Data<UserService>,
 ) -> Result<Server, std::io::Error> {
   let server = HttpServer::new(move || {
@@ -16,7 +18,7 @@ pub fn run_server(
       .service(find_user)
       .app_data(user_service.clone())
   })
-  .bind("127.0.0.1:8000")?
+  .bind(confs.server_binding_addr.as_str())?
   .run();
 
   Ok(server)
