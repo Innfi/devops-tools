@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::persistence::DatabaseConnector;
 use crate::user::entity::UserPayload;
+use crate::user::UserDatabaseAdapter;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EntityUser {
@@ -20,13 +21,14 @@ pub struct CreateUserResult {
 }
 
 pub struct UserService {
-  db_connector: Data<DatabaseConnector>,
+  //db_connector: Data<DatabaseConnector>,
+  user_adapter: Data<dyn UserDatabaseAdapter>,
 }
 
 impl<'a> UserService {
-  pub fn new(connector: Data<DatabaseConnector>) -> Self {
+  pub fn new(adapter: Data<dyn UserDatabaseAdapter>) -> Self {
     Self {
-      db_connector: connector.clone(),
+      user_adapter: adapter.clone(),
     }
   }
 
@@ -34,31 +36,32 @@ impl<'a> UserService {
     &self,
     email: &str,
   ) -> Result<EntityUser, &'static str> {
-    let select_result = sqlx::query!(
-      r#"SELECT id, username, email, created_at FROM users WHERE email=?;"#,
-      email,
-    )
-    .fetch_one(&self.db_connector.connection_pool)
-    .await;
+    return self.user_adapter.select_user(email).await;
+    // let select_result = sqlx::query!(
+    //   r#"SELECT id, username, email, created_at FROM users WHERE email=?;"#,
+    //   email,
+    // )
+    // .fetch_one(&self.db_connector.connection_pool)
+    // .await;
 
-    if select_result.is_err() {
-      return Err("user not found;");
-    }
+    // if select_result.is_err() {
+    //   return Err("user not found;");
+    // }
 
-    let result_object = select_result.unwrap();
+    // let result_object = select_result.unwrap();
 
-    debug!(
-      "id: {}, created_at: {}",
-      result_object.id,
-      result_object.created_at.unwrap()
-    );
+    // debug!(
+    //   "id: {}, created_at: {}",
+    //   result_object.id,
+    //   result_object.created_at.unwrap()
+    // );
 
-    Ok(EntityUser {
-      id: result_object.id,
-      username: result_object.username.unwrap(),
-      email: result_object.email.unwrap(),
-      created_at: Utc.from_utc_datetime(&result_object.created_at.unwrap()),
-    })
+    // Ok(EntityUser {
+    //   id: result_object.id,
+    //   username: result_object.username.unwrap(),
+    //   email: result_object.email.unwrap(),
+    //   created_at: Utc.from_utc_datetime(&result_object.created_at.unwrap()),
+    // })
   }
 
   pub async fn create_user(
