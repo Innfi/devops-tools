@@ -1,24 +1,18 @@
 use actix_web::web;
-use async_trait::async_trait;
-use chrono::{Utc, TimeZone};
+use chrono::{TimeZone, Utc};
 use log::{debug, error};
 use sqlx::MySqlPool;
 
 use crate::confs::Confs;
-use crate::persistence::DatabaseConnector;
-use crate::user::EntityUser;
 use crate::user::entity::UserPayload;
+use crate::user::EntityUser;
 
-#[async_trait]
-pub trait UserDatabaseAdapter {
-  async fn new(&self, confs: &Confs) -> Self;
-  async fn create_user(&self, payload: &web::Json<UserPayload>) -> Result<i32, &'static str>;
-  async fn select_user(&self, email: &str) -> Result<EntityUser, &'static str>;
+pub struct UserDatabaseAdapter {
+  pub connection_pool: MySqlPool,
 }
 
-#[async_trait]
-impl UserDatabaseAdapter for DatabaseConnector {
-  async fn new(&self, confs: &Confs) -> Self {
+impl UserDatabaseAdapter {
+  pub async fn new(confs: &Confs) -> Self {
     Self {
       connection_pool: MySqlPool::connect(&confs.db_url)
         .await
@@ -26,13 +20,16 @@ impl UserDatabaseAdapter for DatabaseConnector {
     }
   }
 
-  async fn create_user(&self, payload: &web::Json<UserPayload>) -> Result<i32, &'static str> {
+  pub async fn insert_user(
+    &self,
+    payload: &web::Json<UserPayload>,
+  ) -> Result<i32, &'static str> {
     let insert_result = sqlx::query!(
       r#"INSERT INTO users(username, email) VALUES (?, ?);"#,
       payload.username.as_str(),
       payload.email.as_str(),
     )
-    .fetch_one(&self.connection_pool)
+    .execute(&self.connection_pool)
     .await;
 
     if insert_result.is_err() {
@@ -43,7 +40,10 @@ impl UserDatabaseAdapter for DatabaseConnector {
     Ok(1)
   }
 
-  async fn select_user(&self, email: &str) -> Result<EntityUser, &'static str> {
+  pub async fn select_user(
+    &self,
+    email: &str,
+  ) -> Result<EntityUser, &'static str> {
     let select_result = sqlx::query!(
       r#"SELECT id, username, email, created_at FROM users WHERE email=?;"#,
       email,

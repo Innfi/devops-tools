@@ -1,12 +1,11 @@
 use actix_web::web;
 use log::info;
-use starter::persistence::DatabaseConnector;
 use std::env;
 
 use starter::bootstrap::run_server;
 use starter::confs::Confs;
-use starter::user::UserService;
 use starter::user::UserDatabaseAdapter;
+use starter::user::UserService;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -29,7 +28,7 @@ fn init_logger() {
 }
 
 async fn create_user_service_data(confs: &Confs) -> web::Data<UserService> {
-  let user_adapter = web::Data::new(DatabaseConnector::new(confs).await);
+  let user_adapter = web::Data::new(UserDatabaseAdapter::new(confs).await);
 
   return web::Data::new(UserService::new(user_adapter));
 }

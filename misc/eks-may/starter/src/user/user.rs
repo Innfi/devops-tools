@@ -1,19 +1,9 @@
 use actix_web::web::{self, Data};
-use chrono::{DateTime, TimeZone, Utc};
-use log::{debug, error};
+use log::debug;
 use serde::{Deserialize, Serialize};
 
-use crate::persistence::DatabaseConnector;
-use crate::user::entity::UserPayload;
+use crate::user::entity::{EntityUser, UserPayload};
 use crate::user::UserDatabaseAdapter;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct EntityUser {
-  pub id: i64,
-  pub username: String,
-  pub email: String,
-  pub created_at: DateTime<Utc>,
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateUserResult {
@@ -21,12 +11,11 @@ pub struct CreateUserResult {
 }
 
 pub struct UserService {
-  //db_connector: Data<DatabaseConnector>,
-  user_adapter: Data<dyn UserDatabaseAdapter>,
+  user_adapter: Data<UserDatabaseAdapter>,
 }
 
-impl<'a> UserService {
-  pub fn new(adapter: Data<dyn UserDatabaseAdapter>) -> Self {
+impl UserService {
+  pub fn new(adapter: Data<UserDatabaseAdapter>) -> Self {
     Self {
       user_adapter: adapter.clone(),
     }
@@ -36,62 +25,24 @@ impl<'a> UserService {
     &self,
     email: &str,
   ) -> Result<EntityUser, &'static str> {
+    debug!("find_user] email: {}", email);
+
     return self.user_adapter.select_user(email).await;
-    // let select_result = sqlx::query!(
-    //   r#"SELECT id, username, email, created_at FROM users WHERE email=?;"#,
-    //   email,
-    // )
-    // .fetch_one(&self.db_connector.connection_pool)
-    // .await;
-
-    // if select_result.is_err() {
-    //   return Err("user not found;");
-    // }
-
-    // let result_object = select_result.unwrap();
-
-    // debug!(
-    //   "id: {}, created_at: {}",
-    //   result_object.id,
-    //   result_object.created_at.unwrap()
-    // );
-
-    // Ok(EntityUser {
-    //   id: result_object.id,
-    //   username: result_object.username.unwrap(),
-    //   email: result_object.email.unwrap(),
-    //   created_at: Utc.from_utc_datetime(&result_object.created_at.unwrap()),
-    // })
   }
 
   pub async fn create_user(
     &self,
     payload: &web::Json<UserPayload>,
   ) -> Result<CreateUserResult, &'static str> {
-    let _ = self.call_create(payload).await.expect("create user failed");
+    debug!("create_user] email: {}", payload.email);
+
+    let insert_result = self.user_adapter.insert_user(payload).await;
+    if insert_result.is_err() {
+      return Err("create_user] create failed");
+    }
 
     Ok(CreateUserResult {
       msg: format!("create success: {}", payload.email),
     })
-  }
-
-  async fn call_create(
-    &self,
-    payload: &web::Json<UserPayload>,
-  ) -> Result<(), &'static str> {
-    let insert_result = sqlx::query!(
-      r#"INSERT INTO users(username, email) VALUES (?, ?);"#,
-      payload.username.as_str(),
-      payload.email.as_str(),
-    )
-    .fetch_one(&self.db_connector.connection_pool)
-    .await;
-
-    if insert_result.is_err() {
-      error!("call_create] insert failed: {}", payload.email);
-      return Err("insert failed");
-    }
-
-    Ok(())
   }
 }
