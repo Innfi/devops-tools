@@ -6,13 +6,16 @@ use log::debug;
 
 use crate::confs::Confs;
 use crate::user::{CreateUserResult, EntityUser, UserPayload, UserService};
+use crate::middleware::SayHi;
 
 pub fn run_server(
   confs: &Confs,
   user_service: web::Data<UserService>,
 ) -> Result<Server, std::io::Error> {
+
   let server = HttpServer::new(move || {
     App::new()
+      .wrap(SayHi)
       .route("/", web::get().to(health_check))
       .service(create_user)
       .service(find_user)
