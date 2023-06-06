@@ -4,7 +4,7 @@ use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web_lab::middleware::Next;
 use log::debug;
 
-async fn my_middleware (
+pub async fn my_middleware(
   req: ServiceRequest,
   next: Next<impl MessageBody>,
 ) -> Result<ServiceResponse<impl MessageBody>, Error> {
