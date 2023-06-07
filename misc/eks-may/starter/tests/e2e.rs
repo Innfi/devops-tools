@@ -41,8 +41,6 @@ async fn spawn_app() {
   let server = starter::bootstrap::run_server(&confs, 
     web::Data::new(UserService::new(user_adapter))
   ).expect("failed to start server");
-    // .await
-    // .expect("failed to start server");
 
   let _ = tokio::spawn(server);
 }

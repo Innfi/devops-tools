@@ -6,6 +6,7 @@ use starter::bootstrap::run_server;
 use starter::confs::Confs;
 use starter::user::UserDatabaseAdapter;
 use starter::user::UserService;
+use starter::side_runner::runner;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
@@ -14,6 +15,10 @@ async fn main() -> std::io::Result<()> {
   info!("main] server");
 
   let confs = Confs::new();
+
+  let _ = tokio::spawn(async {
+    runner().await
+  });
 
   let user_service = create_user_service_data(&confs).await;
   let _ = run_server(&confs, user_service)?.await;
