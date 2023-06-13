@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: starter
+spec:
+  selector:
+    matchLabels:
+      app: starter
+    template:
+      metadata:
+        labels:
+          app: starter
+      spec:
+        containers:
+        - image: {{ .Values.image }}
+          name: starter-dev
