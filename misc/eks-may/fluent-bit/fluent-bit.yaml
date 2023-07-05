@@ -122,6 +122,16 @@ data:
         auto_create_group   true
         extra_user_agent    container-insights
 
+    [OUTPUT]
+        Name                logs_es
+        Include_Tag_Key     true
+        Tag_Key             tags
+        tls                 on
+        tls.verify          off
+        Supress_Type_Name   On
+        cloud_id            elastic:cloud_id
+        cloud_auth          elastic:cloud_pass
+
   dataplane-log.conf: |
     [INPUT]
         Name                systemd
