@@ -3,7 +3,7 @@ variable "instanceid" {
   type = string
 }
 
-variable "alarm-sns-arn" {
-  description = "sns arn for alarm"
+variable "alarm-sqs-arn" {
+  description = "sqs arn for alarm"
   type = string
 }

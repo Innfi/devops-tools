@@ -1,3 +1,15 @@
+resource "aws_sns_topic" "sns_alarm" {
+  name = "sns-alarm"
+}
+
+resource "aws_sns_topic_subscription" "sub_sns_alarm" {
+  topic_arn = aws_sns_topic.sns_alarm.arn
+
+  protocol = "sqs" #email is unsupported because of its interactive procedure
+  endpoint = var.alarm-sqs-arn
+
+}
+
 resource "aws_cloudwatch_metric_alarm" "rds_alarm" {
   alarm_name                = "rds-alarm-cpu"
   comparison_operator       = "GreaterThanOrEqualToThreshold"
