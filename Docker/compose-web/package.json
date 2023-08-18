@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.3",
-    "mongoose": "^6.4.6",
+    "mongoose": "^6.11.3",
     "node-redis": "^0.1.7",
     "redis": "^4.0.1",
     "ts-node": "^10.4.0",
