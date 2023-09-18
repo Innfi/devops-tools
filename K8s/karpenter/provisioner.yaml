@@ -1,0 +1,20 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisoner
+metadata:
+  name: default
+spec:
+  provider:
+    instanceProfile: node-profile
+  requirements:
+    - key: node.k8s.aws/instance-type
+      operator: In
+      values: ["t3a.medium", "t3a.large"]
+    - key: topology.kubernetes.io/zone
+      operator: In
+      values: ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c"]
+    - key: kubernetes.io/arch
+      values: ["arm64"]
+    - key: karpenter.sh/capacy-type
+      operator: In
+      values: ["spot", "on-demand"]
+    ttlSecondsAfterEmtpy: 80
