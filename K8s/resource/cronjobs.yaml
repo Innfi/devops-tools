@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cron-runner
+  namespace: utils
+spec:
+  schedule: "0 0 0 0 5"
+  concurrencyPolicy: Forbid # demands only a single job is run at a time
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  # startingDeadlineSeconds: 10
+  jobTemplate:
+    metadata:
+      namespace: utils
+    spec:
+      template:
+        spec:
+          containers:
+          - name: runner_image
+            image: {{ .Values.cron.container }}
+            imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
+             
