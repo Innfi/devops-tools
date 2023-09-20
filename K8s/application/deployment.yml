@@ -17,6 +17,10 @@ spec:
         image: nginx:1.16.1
         ports:
         - containerPort: 80
+      securityContext:
+        privilegeEscalation: false
+        # runAsUser: (uid)
+        # fsGroup: (gid)
     env:
       - name: POD_NAME
         valueFrom:
