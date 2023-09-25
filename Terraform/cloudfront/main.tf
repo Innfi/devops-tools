@@ -30,31 +30,58 @@ resource "aws_s3_bucket_acl" "simple_front_acl" {
   acl = "public-read"
 }
 
-module "cdn" {
-  source = "terraform-aws-modules/cloudfront/aws"
-  
-  aliases = ["cdn.example.com"]
+resource "aws_cloudfront_origin_access_control" "oac" {
+  name = "oac_s3"
+  origin_access_control_origin_type = "s3"
+  signing_behavior = "always"
+  signing_protocol = "sigv4"
+}
+
+resource "aws_cloudfront_distribution" "cdn_from_s3" {
+  origin {
+    domain_name = var.s3_domain_name
+    origin_id = var.origin_id
+    origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
+  }
 
   enabled = true
-  http_version = "http2and3"
-  is_ipv6_enabled = false
-  price_class = "PriceClass_All"
-  retain_on_delete = false
-  wait_for_deployment = false
+  default_root_object = "root_page.html"
 
-  origin = {
-    s3_oac = {
-      domain_name = "simple-front.s3.ap-northeast-2.amazonaws.com"
-      # origin_access_control = aws_s3_bucket_acl.simple_front_acl
-    }
-  }
+  default_cache_behavior {
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods = ["GET", "HEAD"]
 
-  default_cache_behavior = {
-    target_origin_id       = "appsync"
+    target_origin_id = var.origin_id
+
     viewer_protocol_policy = "allow-all"
-    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
-    query_string           = true
   }
 }
+
+# module "cdn" {
+#   source = "terraform-aws-modules/cloudfront/aws"
+#   
+#   aliases = ["cdn.example.com"]
+# 
+#   enabled = true
+#   http_version = "http2and3"
+#   is_ipv6_enabled = false
+#   price_class = "PriceClass_All"
+#   retain_on_delete = false
+#   wait_for_deployment = false
+# 
+#   origin = {
+#     s3_oac = {
+#       domain_name = "simple-front.s3.ap-northeast-2.amazonaws.com"
+#       # origin_access_control = aws_s3_bucket_acl.simple_front_acl
+#     }
+#   }
+# 
+#   default_cache_behavior = {
+#     target_origin_id       = "appsync"
+#     viewer_protocol_policy = "allow-all"
+#     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+#     cached_methods         = ["GET", "HEAD"]
+#     compress               = true
+#     query_string           = true
+#   }
+# }
