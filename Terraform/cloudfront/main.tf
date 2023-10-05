@@ -55,33 +55,15 @@ resource "aws_cloudfront_distribution" "cdn_from_s3" {
 
     viewer_protocol_policy = "allow-all"
   }
-}
 
-# module "cdn" {
-#   source = "terraform-aws-modules/cloudfront/aws"
-#   
-#   aliases = ["cdn.example.com"]
-# 
-#   enabled = true
-#   http_version = "http2and3"
-#   is_ipv6_enabled = false
-#   price_class = "PriceClass_All"
-#   retain_on_delete = false
-#   wait_for_deployment = false
-# 
-#   origin = {
-#     s3_oac = {
-#       domain_name = "simple-front.s3.ap-northeast-2.amazonaws.com"
-#       # origin_access_control = aws_s3_bucket_acl.simple_front_acl
-#     }
-#   }
-# 
-#   default_cache_behavior = {
-#     target_origin_id       = "appsync"
-#     viewer_protocol_policy = "allow-all"
-#     allowed_methods        = ["GET", "HEAD", "OPTIONS"]
-#     cached_methods         = ["GET", "HEAD"]
-#     compress               = true
-#     query_string           = true
-#   }
-# }
+  viewer_certificate {
+    acm_certificate_arn = var.certificate_arn
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "whitelist"
+      locations = ["KR"]
+    }
+  }
+}
