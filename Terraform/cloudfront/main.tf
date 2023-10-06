@@ -66,4 +66,15 @@ resource "aws_cloudfront_distribution" "cdn_from_s3" {
       locations = ["KR"]
     }
   }
+
+  aliases = [ var.cdn_domain ]
+}
+
+resource "aws_route53_record" "domain_cdn" {
+  zone_id = var.route53_zone_id
+  name = var.cdn_domain
+  type = "A"
+  ttl = 300
+
+  records = aws_cloudfront_distribution.cdn_from_s3.doamin_name
 }
