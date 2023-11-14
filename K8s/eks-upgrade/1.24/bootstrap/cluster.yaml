@@ -2,7 +2,7 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: cluster-may
+  name: initial
   region: ap-northeast-2
   version: "1.24"
 
@@ -10,8 +10,9 @@ vpc:
   cidr: "10.0.0.0/16"
 
 managedNodeGroups:
-  - name: may-node
-    instanceType: t4g.medium
+  - name: initial-node
+    instanceType: t3a.medium
+    amiFamily: AmazonLinux2
     desiredCapacity: 2
     minSize: 2
     maxSize: 3
