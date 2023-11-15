@@ -1,0 +1,12 @@
+namespace: staging
+
+connection:
+  externalPort: 80
+  port: 80
+  nodePort: 30000
+
+service:
+  name: initial-app
+  host: initial-app.io
+
+image: (image path)

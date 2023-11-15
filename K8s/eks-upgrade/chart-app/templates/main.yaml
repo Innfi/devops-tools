@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.service.name }}
+  spec:
+    selector:
+      matchLabels:
+        app: {{ .Values.service.name }}
+    replicas: 2
+    strategy:
+      rollingUpdate:
+        maxSurge: 50%
+        maxUnsvailable: 25%
+      type: RollingUpdate
+    template:
+      metadata:
+        labels:
+          app: {{ .Values.service.name }}
+      spec:
+        containers:
+          - image: {{ .Values.image }}
+            imagePullPolicy: Always
+            name: {{ .Values.service.name }}
+            ports:
+              - containerPort: {{ .Values.connection.port }}
+                protocol: TCP
+---
+apiversion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.service.name }}
+spec:
+  type: NodePort
+  selector:
+    app: {{ .Values.service.name }}
+  ports:
+    - port: {{ .Values.connection.externalPort }}
+      targetPort: {{ .Values.connection.port }}
+      nodePort: {{ .Values.connection.nodePort }}
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-staging
+  namespace: {{ .Values.namespace }}
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    kubernetes.io/ingress.class: alb
+spec:
+  rules:
+    - host: {{ .Values.service.host }}
+      http:
+        paths:
+          - path: /*
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.service.name }}
+                port: {{ .Values.connection.port }}
