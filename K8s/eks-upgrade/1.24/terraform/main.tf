@@ -1,4 +1,8 @@
-{
+resource "aws_iam_policy" "alb-controller-policy" {
+  name = "AlbControllerPolicy"
+  path = "/"
+
+  policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
         {
@@ -238,4 +242,5 @@
             "Resource": "*"
         }
     ]
+  })
 }

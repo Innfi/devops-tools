@@ -1,3 +1,0 @@
-#!/usr/bin/bash
-aws iam create-policy --policy-name AlbControllerPolicy \
---policy-document file://iam_policy.json

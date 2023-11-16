@@ -9,4 +9,4 @@ service:
   name: initial-app
   host: initial-app.io
 
-image: (image path)
+image: nginx:latest
