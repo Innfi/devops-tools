@@ -1,3 +1,32 @@
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+
+  name = "test-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c"]
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+
+  enable_nat_gateway = true
+  enable_dns_hostnames = true
+
+  tags = {
+    Terraform = "true"
+  }
+}
+
+resource "aws_db_instance" "dest_db" {
+  db_name = "dest_db"
+  engine = "mysql"
+  engine_version = "5.8"
+  instance_class = "db.t4g.medium"
+  parameter_group_name = "default.mysql5.8"
+  username = "innfi"
+  password = "test"
+  multi_az = true
+}
+
 resource "aws_sqs_queue" "publisher" {
   name = "publisher"
   delay_seconds = 10
@@ -52,6 +81,11 @@ resource "aws_lambda_function" "subscriber" {
   role = aws_iam_role.subscriber-role.arn
   runtime = "nodejs18.x"
   architectures = ["arm64"]
+
+  vpc_config {
+    subnet_ids = module.vpc.intra_subnets[*].id
+    security_group_ids = [data.security_group_id]
+  }
 
   environment {
     variables = {
