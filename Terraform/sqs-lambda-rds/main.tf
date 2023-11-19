@@ -41,7 +41,10 @@ resource "aws_iam_policy" "lambda-policy" {
       {
         Effect = "Allow"
         Action = [
-          "sqs:*",
+          "sqs:GetQueueUrl",
+          "sqs:GetQueueAttributes",
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
