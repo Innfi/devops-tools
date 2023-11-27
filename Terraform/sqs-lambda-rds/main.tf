@@ -79,11 +79,14 @@ resource "aws_iam_role_policy_attachment" "attach-policy" {
 }
 
 resource "aws_lambda_function" "subscriber" {
-  filename = "artifact.zip"
+  # filename = "artifact.zip"
   function_name = "subscriber"
   role = aws_iam_role.subscriber-role.arn
   runtime = "nodejs18.x"
   architectures = ["arm64"]
+
+  s3_bucket = "test_bucket"
+  s3_key = "artifact.zip" // funtion is not updated by s3 object upload. what to do?
 
   vpc_config {
     subnet_ids = module.vpc.intra_subnets[*].id
