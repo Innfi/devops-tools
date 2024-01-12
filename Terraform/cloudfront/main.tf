@@ -37,6 +37,30 @@ resource "aws_cloudfront_origin_access_control" "oac" {
   signing_protocol = "sigv4"
 }
 
+resource "aws_cloudfront_cache_policy" "test-policy" {
+  name = "test-policy"
+  default_ttl = 50
+  max_ttl = 100
+  min_ttl = 1
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    cookies_config {
+      cookie_behavior = "all"
+    }
+
+    headers_config {
+      header_behavior = "whitelist"
+      headers {
+        items = [""]
+      }
+    }
+
+    query_strings_config {
+      query_string_behavior = "none"
+    }
+  }
+}
+
 resource "aws_cloudfront_distribution" "cdn_from_s3" {
   origin {
     domain_name = var.s3_domain_name
@@ -54,6 +78,7 @@ resource "aws_cloudfront_distribution" "cdn_from_s3" {
     target_origin_id = var.origin_id
 
     viewer_protocol_policy = "allow-all"
+    cache_policy_id = aws_cloudfront_cache_policy.test-policy.id
   }
 
   viewer_certificate {
