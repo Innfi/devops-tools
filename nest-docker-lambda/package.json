@@ -14,6 +14,7 @@
     "start:prod": "node dist/main",
     "clean": "rm -rf ./dist",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "offline": "serverless offline start --useDocker",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",

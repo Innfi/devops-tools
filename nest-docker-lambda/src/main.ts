@@ -2,7 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 export const initNestApp = async () => {
-  return await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
+
+  return app;
 };
 
 async function bootstrap() {
