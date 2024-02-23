@@ -1,0 +1,65 @@
+name: nest-docker-lambda-ci
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - ".github/workflows/action.nest.yaml"
+      - "./nest-docker-lambda"
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./nest-docker-lambda
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: setup-node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: yarn install
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: install
+
+      - name: build
+        uses: borales/actions-yarn@v4
+        with:
+          cmd: build
+
+  push-to-ecr:
+    name: push-to-ecr
+    runs-on: public.ecr.aws/lambda/nodejs:20
+    defaults:
+      run:
+        working-directory: ./nest-docker-lambda
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: login to ecr
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: push to ecr
+        id: build-image
+        env: 
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: nest-docker-lambda
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t ${{ github.run_number }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG 
