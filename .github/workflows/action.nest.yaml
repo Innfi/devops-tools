@@ -63,3 +63,9 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t ${{ github.run_number }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG 
+
+      - name: update lambda
+        uses: int128/deploy-lambda-action@v1
+        with:
+          function-name: lambda-tester
+          image-uri: ${{ secrets.ACCOUNT }}.dkr.ecr.ap-northeast-2.amazonaws.com/lambda-tester:latest
