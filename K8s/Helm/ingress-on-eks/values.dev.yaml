@@ -1,0 +1,16 @@
+namespace: dev
+
+ingressName: initial
+alb:
+  certArn: some-cert-arn
+  ports: '[{"HTTPS": 443}]'
+  subnets: subnet-1, subnet-2
+
+initial:
+  hostname: some.host.name
+  name: initial
+  label: initial
+  servicePort: 80
+  port: 3000
+  nodePort: 30000
+  replicas: 2

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.initial.name }}
+  namespace: {{ .Values.namespace }}
+  label:
+    app: {{ .Values.initial.label }}
+spec:
+  replicas: {{ .Values.initial.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.initial.label }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.initial.label }}
+    spec:
+      containers:
+        - name: {{ .Values.initial.name }}
+          image: {{ .Values.initial.image }}
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              memory: 200Mi
+          ports:
+            - containerPort: {{ .Values.initial.port }}
+              protocol: TCP
+          env:
+            - name: "PROCESS_ENV"
+              value: "dev"
