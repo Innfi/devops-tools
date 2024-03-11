@@ -10,6 +10,10 @@ variable "key_pair" {
   type = string
 }
 
+variable "ec2_tag_name" {
+  type = string
+}
+
 variable "vpc_id" {
   type = string
 }

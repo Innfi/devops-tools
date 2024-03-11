@@ -33,8 +33,25 @@ resource "aws_instance" "test_instance" {
   ]
 
   tags = {
-    Name = "test-instance"
+    Name = var.ec2_tag_name
   }
+}
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = ["codedeploy.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "test_role" {
+  name = "test_deploy_role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_codedeploy_app" "test_deploy" {
@@ -42,7 +59,30 @@ resource "aws_codedeploy_app" "test_deploy" {
   name = "test-deploy"
 }
 
-# TODO: CodeDeploy deployment group
+resource "aws_codedeploy_deployment_group" "test_group" {
+  app_name = aws_codedeploy_app.test_deploy.name 
+  deployment_group_name = "test_group"
+  service_role_arn = aws_iam_role.test_role.arn
+
+  ec2_tag_set {
+    ec2_tag_filter {
+      type = "KEY_AND_VALUE"
+      key = "Name"
+      value = var.ec2_tag_name
+    }
+  }
+
+  auto_rollback_configuration {
+    enabled = true 
+    events = ["DEPLOYMENT_FAILURE"]
+  }
+
+  deployment_style {
+    deployment_type = "IN_PLACE"
+  }
+
+  deployment_config_name = "CodeDeployDefault.AllAtOnce"
+}
 
 resource "aws_iam_policy" "test_policy" {
   name = "test-policy"
