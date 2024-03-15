@@ -6,6 +6,31 @@ resource "aws_s3_bucket" "test_bucket" {
   }
 }
 
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+    principals {
+      type = "Service"
+      identifiers = [
+        "codedeploy.amazonaws.com",
+        "ec2.amazonaws.com"
+      ]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "test_role" {
+  name = "test_deploy_role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+}
+
+resource "aws_iam_instance_profile" "test_profile" {
+  name = "test_profile"
+  role = aws_iam_role.test_role.name
+}
+
 resource "aws_security_group" "test_sg" {
   name = "test-sg"
   vpc_id = var.vpc_id
@@ -31,27 +56,11 @@ resource "aws_instance" "test_instance" {
   vpc_security_group_ids = [
     aws_security_group.test_sg.id
   ]
+  iam_instance_profile = aws_iam_instance_profile.test_profile.name
 
   tags = {
     Name = var.ec2_tag_name
   }
-}
-
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect = "Allow"
-    principals {
-      type = "Service"
-      identifiers = ["codedeploy.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
-}
-
-resource "aws_iam_role" "test_role" {
-  name = "test_deploy_role"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_codedeploy_app" "test_deploy" {
