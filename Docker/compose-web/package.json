@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.3",
+    "express": "^4.19.2",
     "mongoose": "^6.12.5",
     "node-redis": "^0.1.7",
     "redis": "^4.0.1",
