@@ -1,3 +1,4 @@
+
 resource "aws_security_group" "starter_group" {
   name = "starter-group"
   vpc_id = var.vpc_id
@@ -23,10 +24,16 @@ resource "aws_security_group_rule" "group_rule_egress" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
+resource "aws_iam_instance_profile" "starter_profile" {
+  name = "starter-profile"
+  role = var.role_name
+}
+
 resource "aws_instance" "starter" {
   ami = var.ami_id
   instance_type = "t3a.micro"
   subnet_id = var.subnet_id
   key_name = var.key_name
   vpc_security_group_ids = [aws_security_group.starter_group.id]
+  iam_instance_profile = aws_iam_instance_profile.starter_profile.arn
 }

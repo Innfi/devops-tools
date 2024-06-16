@@ -24,9 +24,20 @@ module "vpc" {
   enable_dns_hostnames = true
 }
 
+module "ecr_baseline" {
+  source = "./modules/ecr"
+}
+
+module "role_baseline" {
+  source = "./modules/role-baseline"
+
+  ecr_arn = module.ecr_baseline.arn
+}
+
 module "ec2_baseline" {
   source = "./modules/ec2-baseline"
 
   vpc_id = module.vpc.vpc_id
   subnet_id = module.vpc.public_subnets[0]
+  role_name = module.role_baseline.name
 }
