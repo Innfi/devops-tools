@@ -28,16 +28,15 @@ module "ecr_baseline" {
   source = "./modules/ecr"
 }
 
-module "role_baseline" {
-  source = "./modules/role-baseline"
+module "ecr_user" {
+  source = "./modules/ecr-user"
 
   ecr_arn = module.ecr_baseline.arn
 }
 
-module "ec2_baseline" {
-  source = "./modules/ec2-baseline"
-
-  vpc_id = module.vpc.vpc_id
-  subnet_id = module.vpc.public_subnets[0]
-  role_name = module.role_baseline.name
-}
+# module "ec2_baseline" {
+#   source = "./modules/ec2-baseline"
+# 
+#   vpc_id = module.vpc.vpc_id
+#   subnet_id = module.vpc.public_subnets[0]
+# }
