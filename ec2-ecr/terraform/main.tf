@@ -34,9 +34,9 @@ module "ecr_user" {
   ecr_arn = module.ecr_baseline.arn
 }
 
-# module "ec2_baseline" {
-#   source = "./modules/ec2-baseline"
-# 
-#   vpc_id = module.vpc.vpc_id
-#   subnet_id = module.vpc.public_subnets[0]
-# }
+module "ec2_baseline" {
+  source = "./modules/ec2-baseline"
+
+  vpc_id = module.vpc.vpc_id
+  subnet_id = module.vpc.public_subnets[0]
+}

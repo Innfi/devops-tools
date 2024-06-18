@@ -1,7 +1,11 @@
-output "ecr_output" {
-  value = module.ecr_baseline.*
+output "ecr_arn" {
+  value = module.ecr_baseline.arn
 }
 
-output "user_output" {
-  value = module.ecr_user.*
+output "user_name" {
+  value = module.ecr_user.user_name
+}
+
+output "user_arn" {
+  value = module.ecr_user.user_arn
 }
