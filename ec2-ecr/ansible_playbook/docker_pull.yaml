@@ -7,3 +7,16 @@
     - name: ping
       ping:
       remote_user: ec2
+
+    - name: yum update
+      yum: name=* state: latest
+
+# login to aws via user credential
+
+# pull image
+
+# stop and remove existing container with image
+
+# start a new container
+
+# check connectivity
