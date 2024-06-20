@@ -12,8 +12,15 @@
       yum: name=* state: latest
 
 # login to aws via user credential
+    - name: login
+      ansible.builtin.shell:
+      aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin (aws sts get-caller-identity|jq .Account -r).dkr.ecr.ap-northeast-2.amazonaws.com     
 
 # pull image
+    - name: pull image from ECR
+      community.docker.docker_image:
+        name: (aws sts get-caller-identity|jq .Account -r).dkr.ecr.ap-northeast-2.amazonaws.com/starter
+        source: pull
 
 # stop and remove existing container with image
 
