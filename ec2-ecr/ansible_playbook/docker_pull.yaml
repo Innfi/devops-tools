@@ -22,6 +22,18 @@
         name: (aws sts get-caller-identity|jq .Account -r).dkr.ecr.ap-northeast-2.amazonaws.com/starter
         source: pull
 
+# remove, pull, start the container
+    - name: remove container
+      community.docker.docker_container:
+        name: starter
+        state: absent
+
+    - name: pull image and start
+      community.docker.docker_container:
+        name: starter
+        image: (aws sts get-caller-identity|jq .Account -r).dkr.ecr.ap-northeast-2.amazonaws.com/starter:latest
+        state: present
+
 # stop and remove existing container with image
 
 # start a new container
