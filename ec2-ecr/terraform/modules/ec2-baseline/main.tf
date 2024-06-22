@@ -14,6 +14,16 @@ resource "aws_security_group_rule" "group_rule_ingress" {
   cidr_blocks = var.ingress_cidr_blocks
 }
 
+resource "aws_security_group_rule" "group_rule_ingress_terminal" {
+  security_group_id = aws_security_group.starter_group.id
+  type = "ingress" 
+  from_port = var.ingress_port_terminal
+  to_port = var.ingress_port_terminal
+  protocol = "tcp"
+
+  cidr_blocks = var.ingress_cidr_terminal
+}
+
 resource "aws_security_group_rule" "group_rule_egress" {
   security_group_id = aws_security_group.starter_group.id
   type = "egress" 
@@ -30,4 +40,5 @@ resource "aws_instance" "starter" {
   subnet_id = var.subnet_id
   key_name = var.key_name
   vpc_security_group_ids = [aws_security_group.starter_group.id]
+  associate_public_ip_address = true
 }

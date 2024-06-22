@@ -1,5 +1,0 @@
-[starter_host]
-127.0.0.1
-
-[starter]
-key_file=./key.pem
