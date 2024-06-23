@@ -1,7 +1,7 @@
 ---
 - hosts: starter_host
-  become: yes
   user: ec2-user
+  become: yes
 
   tasks:
     - name: ping
@@ -33,9 +33,3 @@
         name: starter
         image: (aws sts get-caller-identity|jq .Account -r).dkr.ecr.ap-northeast-2.amazonaws.com/starter:latest
         state: present
-
-# stop and remove existing container with image
-
-# start a new container
-
-# check connectivity
