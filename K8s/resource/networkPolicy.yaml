@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: innfis-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      tag: innfi
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # - {} works as allow all ingress traffic
+  - from:
+    - ipBlock:
+        cidr: 172.17.0.0/16
+    # - namespaceSelector
+    # - podSelector
+    ports:
+    - protocol: TCP
+      port: 8080
+  egress:
+  - {}
