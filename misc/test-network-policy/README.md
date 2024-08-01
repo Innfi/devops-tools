@@ -1,1 +1,1 @@
-# folowing https://www.eksworkshop.com/docs/networking/
+# following https://www.eksworkshop.com/docs/networking/
