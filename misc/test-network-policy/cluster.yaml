@@ -1,17 +1,17 @@
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 availabilityZones:
-  - ${AWS_REGION}a
-  - ${AWS_REGION}b
-  - ${AWS_REGION}c
+  - ap-northeast-2a
+  - ap-northeast-2b
+  - ap-northeast-2c
 metadata:
-  name: ${EKS_CLUSTER_NAME}
-  region: ${AWS_REGION}
+  name: cluster-august
+  region: ap-northeast-2
   version: "1.30"
   tags:
-    karpenter.sh/discovery: ${EKS_CLUSTER_NAME}
+    karpenter.sh/discovery: cluster-august
     created-by: eks-workshop-v2
-    env: ${EKS_CLUSTER_NAME}
+    env: cluster-august
 iam:
   withOIDC: true
 vpc:
