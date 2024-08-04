@@ -1,0 +1,15 @@
+# https://docs.aws.amazon.com/eks/latest/userguide/security-groups-for-pods.html
+# t types family is not supported 
+
+apiVersion: vpcresources.k8s.aws/v1beta1
+kind: SecurityGroupPolicy
+metadata:
+  name: basic-security-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: target-app
+    securityGroups:
+      groupIds:
+        - {aws security group id}
+    
