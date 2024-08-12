@@ -1,7 +1,8 @@
-## TODO
----
-# remove duplicate
-# focus...!
+## EKS exercises
 
-## DONE
----
+* eksctl
+* upgrade considerations
+* RBAC
+* ALB Controller
+* Gateway API
+* etc
