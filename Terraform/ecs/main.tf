@@ -24,6 +24,66 @@ module "vpc" {
   enable_dns_hostnames = true
 }
 
+module "alb" {
+  source = "terraform-aws-modules/alb/aws"
+
+  name = "test-alb"
+
+  load_balancer_type = "application"
+
+  vpc_id = module.vpc.vpc_id
+  subnets = module.vpc.public_subnets
+
+  security_group_ingress_rules = {
+    initial = {
+      from_port = 8080
+      to_port = 8080
+      ip_protocol = "tcp"
+      cidr_ipv4 = "0.0.0.0/0"
+    }
+  }
+
+  security_group_egress_rules = {
+    all = {
+      ip_protocol = "-1"
+      cidr_ipv4 = module.vpc.vpc_cidr_block
+    }
+  }
+
+  listeners = {
+    listener_initial = {
+      port = 8080
+      protocol = "HTTP"
+
+      forward = {
+        target_group_key = "initial_group"
+      }
+    }
+  }
+
+  target_groups = {
+    initial_group = {
+      backend_protocol = "HTTP"
+      backend_port = 3000
+      target_type = "ip"
+
+      health_check = {
+        enabled = true
+        healty_threshoold = 5
+        interval = 10
+        matcher = "200"
+        path = "/health"
+        port = "traffic-port"
+        protocol = "HTTP"
+        timeout = 5
+        unhealth_threshold = 2
+      }
+
+      create_attachment = false
+    }
+  }
+}
+
 module "ecs_cluster" {
   source = "terraform-aws-ecs/modules/cluster"
 
@@ -44,10 +104,16 @@ module "ecs_cluster" {
   }
 }
 
-module "ecs_task_definition" {
+module "ecs_service" {
   source = "terraform-aws-ecs/modules/service"
 
   name = "test-service"
+}
+
+module "ecs_task_definition" {
+  source = "terraform-aws-ecs/modules/service"
+
+  name = "test-task"
   cluster_arn = module.ecs_cluster.arn
   subnet_ids = module.vpc.private_subnets
 
@@ -72,5 +138,3 @@ module "ecs_task_definition" {
     }
   }
 }
-
-// TODO: service, alb
