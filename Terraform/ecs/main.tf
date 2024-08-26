@@ -84,6 +84,10 @@ module "alb" {
   }
 }
 
+resource "aws_service_discovery_http_namespace" "test_service_discovery" {
+  name        = "test-service-discovery"
+}
+
 module "ecs_cluster" {
   source = "terraform-aws-ecs/modules/cluster"
 
@@ -108,16 +112,69 @@ module "ecs_service" {
   source = "terraform-aws-ecs/modules/service"
 
   name = "test-service"
-}
 
-module "ecs_task_definition" {
-  source = "terraform-aws-ecs/modules/service"
+  enable_execute_command = true
 
-  name = "test-task"
-  cluster_arn = module.ecs_cluster.arn
+  container_definitions = {
+    fluent-bit = {
+      cpu = 512
+      memory = 1024
+      essential = true
+      image = "fluent/fluent-bit:latest"
+      user = "0"
+    }
+
+    basic-backend = {
+      cpu = 512
+      memory = 1024
+      essential = true
+      image = "innfi/basic-backend:latest"
+      port_mappings = [
+        {
+          name = "basic-backend"
+          containerPort = 3000
+          hostPort = 3000
+          protocol = "tcp"
+        }
+      ]
+
+      dependencies = [{
+        container_name = "fluent-bit"
+        condition = "START"
+      }]
+    }
+  }
+
+  service_connect_configuration = {
+    namespace = aws_service_discovery_http_namespace.test_service_discovery.arn 
+    service = {
+      client_alias = {
+        port = 3000
+        dns_name = "basic-backend"
+      }
+
+      port_name = "basic-backend"
+      discovery_name = "basic-backend"
+    }
+  }
+
+  load_balancer = {
+    service = {
+      target_group_arn = module.alb.target_groups["initial_group"].arn
+      container_name = "basic-backend"
+      container_port = 3000
+    }
+  }
+
   subnet_ids = module.vpc.private_subnets
-
   security_group_rules = {
+    alb_ingress_3000 = {
+      type = "ingress"
+      from_port = 3000
+      to_port = 3000
+      protocol = "tcp"
+      source_security_group_id = module.alb.security_group_id
+    }
     egress_all = {
       type = "egress" 
       from_port = 0
@@ -126,15 +183,34 @@ module "ecs_task_definition" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-
-  runtime_platform = {
-    cpu_architecture = "ARM64"
-    operating_system_family = "LINUX"
-  }
-
-  container_definitions = {
-    test_basic_backend = {
-      image = "innfi/basic-backend:latest"
-    }
-  }
 }
+
+# module "ecs_task_definition" {
+#   source = "terraform-aws-ecs/modules/service"
+# 
+#   name = "test-task"
+#   cluster_arn = module.ecs_cluster.arn
+#   subnet_ids = module.vpc.private_subnets
+# 
+#   security_group_rules = {
+#     egress_all = {
+#       type = "egress" 
+#       from_port = 0
+#       to_port = 0
+#       protocol = "-1"
+#       cidr_blocks = ["0.0.0.0/0"]
+#     }
+#   }
+# 
+#   runtime_platform = {
+#     cpu_architecture = "ARM64"
+#     operating_system_family = "LINUX"
+#   }
+# 
+#   container_definitions = {
+#     test_basic_backend = {
+#       image = "innfi/basic-backend:latest"
+#     }
+#   }
+# }
+# 
