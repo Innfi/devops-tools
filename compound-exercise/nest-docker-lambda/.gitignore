@@ -37,3 +37,6 @@ lerna-debug.log*
 .terraform
 .terraform.lock.hcl
 terraform.tfstate
+.package.json
+.package-lock.json
+yarn.lock
