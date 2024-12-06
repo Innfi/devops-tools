@@ -1,0 +1,11 @@
+services:
+  ubuntu:
+    image: nginx:latest
+    ports:
+      - 8080:80
+    volumes: 
+      - data:/data
+
+volumes:
+  data:
+    external: true
