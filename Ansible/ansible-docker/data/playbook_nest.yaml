@@ -1,0 +1,40 @@
+- name: Deploy Nest.js Application
+  hosts: your_target_host
+  become: yes
+  vars:
+    app_directory: /path/to/your/app
+    git_repo: git@test.git
+    git_branch: main
+    process_name: your_app_process_name
+
+  tasks:
+    - name: Stop the current process
+      shell: pkill -f "{{ process_name }}"
+      ignore_errors: yes
+
+    - name: Ensure app directory exists
+      file:
+        path: "{{ app_directory }}"
+        state: directory
+
+    - name: Pull latest code from git repository
+      git:
+        repo: "{{ git_repo }}"
+        version: "{{ git_branch }}"
+        dest: "{{ app_directory }}"
+        force: yes
+
+    - name: Install dependencies
+      npm:
+        path: "{{ app_directory }}"
+        state: present
+
+    - name: Build the application
+      command: npm run build
+      args:
+        chdir: "{{ app_directory }}"
+
+    - name: Start the application
+      shell: nohup npm run start:prod > /dev/null 2>&1 &
+      args:
+        chdir: "{{ app_directory }}"
