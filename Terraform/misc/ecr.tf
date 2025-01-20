@@ -11,6 +11,31 @@ resource "aws_ecr_repository" "private_repo" {
 		scan_on_push = true # false
 	}
 
-	encryption_type = "KMS" #AES256
-	kms_key = aws_kms_key.test_key.arn
+	encryption_configuration {
+		encryption_type = "KMS" #AES256
+		kms_key = aws_kms_key.test_key.arn
+	}
+}
+
+
+resource "aws_ecr_lifecycle_policy" "lcp" {
+	repository = aws_ecr_repository.private_repo.name
+
+	policy = jsonencode({
+		"rules": [
+			{
+				"rulePriority": 1,
+				"description": "pruning rule"
+				"selection": {
+					"tagStatus": "untagged",
+					"countType": "sinceImagePushed",
+          "countUnit": "days",
+          "countNumber": 180
+        },
+        "action": {
+          "type": "expire"
+        }
+			}
+		]
+	})
 }
