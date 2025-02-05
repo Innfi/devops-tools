@@ -35,3 +35,29 @@ module "vpc" {
   enable_nat_gateway = true
   enable_dhcp_options = true
 }
+
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.0"
+
+  cluster_name = "test-cluster"
+  cluster_version = "1.31"
+
+  cluster_addons = {
+    coredns = {}
+    eks-pod-identity-agent = {}
+    kube-proxy = {}
+    vpc-cni = {}
+  }
+
+  vpc_id = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  eks_managed_node_groups = {
+    initial_group = {
+      instance_types = var.nodegroup_instance_types
+      min_size = var.nodegroup_min_size
+      max_size = var.nodegroup_max_size
+    }
+  }
+}
