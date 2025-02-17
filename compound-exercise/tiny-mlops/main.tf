@@ -72,3 +72,13 @@ module "karpenter" {
 
   create_access_entry = false
 }
+
+
+module "kubeflow" {
+  source = "Young-ook/eks/aws//examples/kubeflow"
+  version = "1.7.6"
+
+  kubernetes_version = module.eks.cluster_version
+  name = module.eks.cluster_name
+  subnets = module.vpc.private_subnets
+}
