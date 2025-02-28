@@ -33,3 +33,16 @@ module "connector" {
   acceptor_vpc_id = var.acceptor_vpc_id
   target_cidr_blocks = var.target_cidr_blocks
 }
+
+module "bastion" {
+  source = "./modules/bastion"
+
+  vpc_id = module.vpc.vpc_id
+  ingress_cidr_blocks = var.bastion_ingress_cidr_blocks
+  ingress_port_from = var.bastion_ingress_port_from
+  ingress_port_to = var.bastion_ingress_port_to
+  ami = var.bastion_ami
+  instance_type = var.bastion_instance_type
+  key_name = var.bastion_key_name
+  subnet_id = module.vpc.public_subnets[0].id
+}
