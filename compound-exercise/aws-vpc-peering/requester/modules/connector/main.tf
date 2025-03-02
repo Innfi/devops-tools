@@ -9,8 +9,8 @@ resource "aws_security_group" "requester" {
   vpc_id = var.vpc_id
 
   ingress {
-    from_port = -1
-    to_port = -1
+    from_port = 0
+    to_port = 0
     protocol = "tcp"
     cidr_blocks = var.target_cidr_blocks
   }
