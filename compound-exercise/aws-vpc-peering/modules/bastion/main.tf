@@ -1,5 +1,5 @@
 resource "aws_security_group" "bastion" {
-  name = "starter-group"
+  name = "bastion"
   vpc_id = var.vpc_id
 }
 
@@ -8,7 +8,7 @@ resource "aws_security_group_rule" "group_rule_ingress" {
   type = "ingress" 
   from_port = var.ingress_port_from
   to_port = var.ingress_port_to
-  protocol = "tcp"
+  protocol = "all"
 
   cidr_blocks = var.ingress_cidr_blocks
 }
