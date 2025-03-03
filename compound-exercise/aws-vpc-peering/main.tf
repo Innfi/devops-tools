@@ -49,13 +49,46 @@ module "vpc_requester" {
   enable_flow_log = false
 }
 
+# should be inialized after both vpcs are created
+module "vpc_peering" {
+  source = "cloudposse/vpc-peering/aws"
+
+  auto_accept = true
+  requestor_vpc_id = module.vpc_requester.vpc_id
+  requestor_allow_remote_vpc_dns_resolution = true
+  acceptor_vpc_id = module.vpc_accepter.vpc_id
+  acceptor_allow_remote_vpc_dns_resolution = true
+
+  depends_on = [
+    module.vpc_requester,
+    module.vpc_accepter
+  ]
+}
+
 module "bastion" {
   source = "./modules/bastion"
 
-  vpc_id = module.vpc.vpc_id
+  vpc_id = module.vpc_requester.vpc_id
   ingress_cidr_blocks = var.bastion_ingress_cidr_blocks
   ingress_port_from = var.bastion_ingress_port_from
   ingress_port_to = var.bastion_ingress_port_to
   key_name = var.bastion_key_name
-  subnet_id = module.vpc.public_subnets[0]
+  subnet_id = module.vpc_requester.public_subnets[0]
+}
+
+module "rds" {
+  source  = "terraform-aws-modules/rds/aws"
+  
+  identifier = "accepter"
+  
+  engine = "mysql"
+  engine_version = "8.0.40"
+  instance_class = "db.t3.micro"
+
+  create_db_subnet_group = false
+  subnet_ids = module.vpc_accepter.private_subnets
+
+  manage_master_user_password = false
+  username = var.db_master_username
+  password = var.db_password
 }
