@@ -77,18 +77,8 @@ module "bastion" {
 }
 
 module "rds" {
-  source  = "terraform-aws-modules/rds/aws"
-  
-  identifier = "accepter"
-  
-  engine = "mysql"
-  engine_version = "8.0.40"
-  instance_class = "db.t3.micro"
+  source = "./modules/rds"
+  db_subnets = module.vpc_accepter.private_subnets
 
-  create_db_subnet_group = false
-  subnet_ids = module.vpc_accepter.private_subnets
-
-  manage_master_user_password = false
-  username = var.db_master_username
-  password = var.db_password
+  requester_vpc_id = module.vpc_requester.vpc_id
 }
