@@ -28,6 +28,10 @@ module "vpc_accepter" {
   enable_nat_gateway = true
   single_nat_gateway = true
   map_public_ip_on_launch = true
+
+  tags = {
+    "OrderBy" = "Innfi"
+  }
 }
 
 module "vpc_requester" {
@@ -47,9 +51,13 @@ module "vpc_requester" {
 
   enable_dns_hostnames = true
   enable_flow_log = false
+
+  tags = {
+    "OrderBy" = "Innfi"
+  }
 }
 
-# should be inialized after both vpcs are created
+# should be initialized after both vpcs are created
 module "vpc_peering" {
   source = "cloudposse/vpc-peering/aws"
 
@@ -63,6 +71,10 @@ module "vpc_peering" {
     module.vpc_requester,
     module.vpc_accepter
   ]
+
+  tags = {
+    "OrderBy" = "Innfi"
+  }
 }
 
 module "bastion" {
