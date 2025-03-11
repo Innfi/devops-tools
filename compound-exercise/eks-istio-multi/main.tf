@@ -11,6 +11,30 @@ provider "aws" {
   region = "ap-northeast-2"
 }
 
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    }
+  }
+}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
   version = "5.19.0"
@@ -35,7 +59,7 @@ module "vpc" {
 }
 
 module "eks" {
-  source = "terraform-aws-module/eks/aws"
+  source = "terraform-aws-modules/eks/aws"
   version = "~> 20.31"
 
   cluster_name = "alpha"
@@ -50,6 +74,8 @@ module "eks" {
   cluster_addons = {
     coredns = {}
     kube-proxy = {}
+    vpc-cni = {}
+    aws-ebs-csi-driver = {}
   }
 }
 
