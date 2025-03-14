@@ -71,6 +71,33 @@ module "eks" {
   vpc_id = module.vpc.vpc_id
   subnet_ids = module.vpc.public_subnets
 
+  eks_managed_node_groups = {
+    runners = {
+      instance_types = ["t3.medium"]
+
+      min_size = 2
+      max_size = 3
+      desired_size = 2
+    }
+  }
+
+  node_security_group_additional_rules = {
+    ingress_15017 = {
+      protocol = "TCP"
+      from_port = 15017
+      to_port = 15017
+      type = "ingress"
+      source_cluster_security_group = true
+    }
+    ingress_15012 = {
+      protocol = "TCP"
+      from_port = 15012
+      to_port = 15012
+      type = "ingress"
+      source_cluster_security_group = true
+    }
+  }
+
   cluster_addons = {
     coredns = {}
     kube-proxy = {}
@@ -79,3 +106,8 @@ module "eks" {
   }
 }
 
+resource "kubernetes_namespace_v1" "istio_system" {
+  metadata {
+    name = "istio-system"
+  }
+}
