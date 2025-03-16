@@ -111,3 +111,65 @@ resource "kubernetes_namespace_v1" "istio_system" {
     name = "istio-system"
   }
 }
+
+module "eks_blueprints_addons" {
+  source = "aws-ia/eks-blueprints-addons/aws"
+  version = "~> 1.20"
+
+  cluster_name = module.eks.cluster_name
+  cluster_endpoint = module.eks.cluster_endpoint
+  cluster_version = module.eks.cluster_version
+  oidc_provider_arn = module.eks.oidc_provider_arn
+
+  enable_aws_load_balancer_controller = true
+
+  helm_releases = {
+    istio-base = {
+      chart = "base"
+      chart_version = var.istio_chart_version
+      repository = var.istio_chart_url
+      name = "istio-base"
+      namespace = kubernetes_namespace_v1.istio_system.metadata[0].name
+    }
+
+    istiod = {
+      chart = "istiod"
+      chart_version = var.istio_chart_version
+      repository = var.istio_chart_url
+      name = "istiod"
+      namespace = kubernetes_namespace_v1.istio_system.metadata[0].name
+
+      set = [
+        {
+          name = "meshConfig.accessLogFile"
+          value = "/dev/stdout"
+        }
+      ]
+    }
+
+    istio-ingress = {
+      chart = "gateway"
+      chart_version = var.istio_chart_version
+      repository = var.istio_chart_url
+      name = "istio-ingress"
+      namespace = "istio-ingress"
+      create_namespace = true
+      
+      values = [
+        yamlencode({
+          labels = {
+            istio = "ingressgateway"
+          }
+          service = {
+            annotations = {
+              "service.beta.kubernetes.io/aws-load-balancer-type" = "external"
+              "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type" = "ip"
+              "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internet-facing"
+              "service.beta.kubernetes.io/aws-load-balancer-attributes" = "load_balancing.cross_zone.enabled=true"
+            }
+          }
+        })
+      ]
+    }
+  }
+}
