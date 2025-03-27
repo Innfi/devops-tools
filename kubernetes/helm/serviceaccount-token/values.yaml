@@ -1,0 +1,5 @@
+namespace: default
+name: tester
+token: tester-token
+role: tester-role
+rolebinding: tester-rolebinding
