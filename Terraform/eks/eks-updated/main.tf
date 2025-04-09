@@ -59,6 +59,32 @@ module "eks" {
     }
   }
 
+  # or resource "aws_eks_access_policy_association" after cluster creation
+  access_entries = {
+    tester = {
+      principal_arn = var.access_entry_arn
+      policy_associations = {
+        test_connection = {
+          policy_arn = var.tester_policy_arn
+        }
+      }
+    }
+
+    example = {
+      principal_arn = var.example_arn
+
+      policy_associations = {
+        example = {
+          policy_arn = var.example_policy_arn
+          access_scope = {
+            namespaces = ["default"]
+            type       = "namespace"
+          }
+        }
+      }
+    }
+  }
+
   cluster_addons = {
     coredns = {}
     kube_proxy = {}
