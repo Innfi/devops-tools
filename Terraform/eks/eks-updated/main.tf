@@ -48,14 +48,24 @@ module "eks" {
   cluster_security_group_id = var.cluster_security_group_id
 
   eks_managed_node_groups = {
-    nodes = {
+    private_nodes = {
       instance_type = var.node_group_instance_types
       min_size = var.node_group_min_size
       max_size = var.node_group_max_size
       desired_size = var.node_group_desired_size
 
-      subnets = module.vpc.private_subnets
-      vpc_security_group_ids = var.node_group_security_ids
+      subnet_ids = module.vpc.private_subnets
+      vpc_security_group_ids = var.private_security_group_ids
+    }
+
+    public_nodes = {
+      instance_type = var.node_group_instance_types
+      min_size = var.node_group_min_size
+      max_size = var.node_group_max_size
+      desired_size = var.node_group_desired_size
+
+      subnet_ids = module.vpc.public_subnets
+      vpc_security_group_ids = var.public_security_group_ids
     }
   }
 
