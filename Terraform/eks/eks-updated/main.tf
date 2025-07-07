@@ -56,6 +56,10 @@ module "eks" {
 
       subnet_ids = module.vpc.private_subnets
       vpc_security_group_ids = var.private_security_group_ids
+
+      label = {
+        node_label = "private_nodes"
+      }
     }
 
     public_nodes = {
@@ -66,7 +70,25 @@ module "eks" {
 
       subnet_ids = module.vpc.public_subnets
       vpc_security_group_ids = var.public_security_group_ids
+
+      label = {
+        node_label = "public_nodes"
+      }
     }
+
+    # deployment affinity example
+    # spec:
+    #   template:
+    #     spec:
+    #       affinity:
+    #         nodeAffinity:
+    #           requiredDuringSchedulingIgnoredDuringExecution:
+    #             nodeSelectorTerms:
+    #               - matchExpressions:
+    #                   - key: node_label
+    #                     operator: In
+    #                     values:
+    #                       - private_nodes
   }
 
   # or resource "aws_eks_access_policy_association" after cluster creation
