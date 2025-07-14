@@ -29,6 +29,23 @@ module "vpc" {
   map_public_ip_on_launch = true
 }
 
+# https://github.com/aws/amazon-vpc-cni-k8s/issues/2840
+
+resource "aws_launch_template" "custom" {
+  name_prefix = "eks-custom-"
+  image_id = var.node_ami_id
+  instance_type = var.node_instance_type
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "custom-node"
+    }
+  }
+}
+
+
 #eks requires security groups, for the cluster and the node group
 
 module "eks" {
@@ -70,6 +87,11 @@ module "eks" {
 
       subnet_ids = module.vpc.public_subnets
       vpc_security_group_ids = var.public_security_group_ids
+
+      launch_template = {
+        id = aws_launch_template.custom.id
+        version = "$Latest"
+      }
 
       label = {
         node_label = "public_nodes"
