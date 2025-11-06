@@ -110,3 +110,17 @@ resource "aws_iam_role_policy" "bedrock_logging" {
     ]
   })
 }
+
+resource "aws_bedrockagent_knowledge_base" "example" {
+  name     = "example"
+  role_arn = var.knowledge_base_role_arn
+  knowledge_base_configuration {
+    vector_knowledge_base_configuration {
+      embedding_model_arn = var.embedding_model_arn
+    }
+    type = "VECTOR"
+  }
+  storage_configuration {
+    # TODO: storage configuration
+  }
+}
