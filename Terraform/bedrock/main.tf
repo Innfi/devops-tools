@@ -121,6 +121,93 @@ resource "aws_bedrockagent_knowledge_base" "example" {
     type = "VECTOR"
   }
   storage_configuration {
-    # TODO: storage configuration
+    type = "RDS"
+    rds_configuration {
+      resource_arn = var.vectordb_arn
+      credentials_secret_arn = var.credentials_arn 
+      database_name = "test-vectordb"
+      table_name = "test-kb"
+      field_mapping {
+        primary_key_field = "id"
+        vector_field = "embedding"
+        text_field = "text"
+        metadata_field = "metadata"
+      }
+    }
+  }
+}
+
+resource "aws_bedrock_guardrail" "advanced" {
+  name                      = "advanced-guardrail"
+  blocked_input_messaging   = "This request cannot be processed."
+  blocked_outputs_messaging = "This response cannot be provided."
+  description               = "Advanced guardrail with multiple policies"
+
+  # Content filters
+  content_policy_config {
+    filters_config {
+      type            = "HATE"
+      input_strength  = "HIGH"
+      output_strength = "HIGH"
+    }
+    filters_config {
+      type            = "VIOLENCE"
+      input_strength  = "MEDIUM"
+      output_strength = "HIGH"
+    }
+  }
+
+  # Topic-based blocking
+  topic_policy_config {
+    topics_config {
+      name       = "financial-advice"
+      definition = "Providing specific investment or financial advice"
+      examples   = ["Should I invest in stocks?", "What stocks should I buy?"]
+      type       = "DENY"
+    }
+    topics_config {
+      name       = "medical-diagnosis"
+      definition = "Providing medical diagnoses or treatment recommendations"
+      examples   = ["Do I have cancer?", "What medicine should I take?"]
+      type       = "DENY"
+    }
+  }
+
+  # Word filters (profanity, custom words)
+  word_policy_config {
+    managed_word_lists_config {
+      type = "PROFANITY"
+    }
+    words_config {
+      text = "confidential"
+    }
+    words_config {
+      text = "internal-only"
+    }
+  }
+
+  # Sensitive information filters (PII)
+  sensitive_information_policy_config {
+    pii_entities_config {
+      action = "BLOCK"
+      type   = "EMAIL"
+    }
+    pii_entities_config {
+      action = "ANONYMIZE"
+      type   = "PHONE"
+    }
+    pii_entities_config {
+      action = "BLOCK"
+      type   = "CREDIT_DEBIT_CARD_NUMBER"
+    }
+    pii_entities_config {
+      action = "BLOCK"
+      type   = "US_SOCIAL_SECURITY_NUMBER"
+    }
+  }
+
+  tags = {
+    Environment = "production"
+    Team        = "platform"
   }
 }
