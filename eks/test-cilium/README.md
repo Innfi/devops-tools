@@ -1,23 +1,23 @@
 # Cilium with EKS Learning & Exercise Todo List
 
 ## Setup & Prerequisites
-- [ ] Install AWS CLI and configure credentials
-- [ ] Install kubectl and verify cluster access
-- [ ] Install Helm 3.x or later
-- [ ] Familiarize with EKS cluster networking basics
+- [x] Install AWS CLI and configure credentials
+- [x] Install kubectl and verify cluster access
+- [x] Install Helm 3.x or later
+- [x] Familiarize with EKS cluster networking basics
 - [ ] Review Cilium documentation and architecture overview
 
 ## EKS Cluster Preparation
-- [ ] Create EKS cluster with appropriate IAM roles and security groups
+- [x] Create EKS cluster with appropriate IAM roles and security groups
 - [ ] Verify cluster meets Cilium prerequisites (kernel version 4.9+)
 - [ ] Configure VPC CNI (if applicable) or prepare for Cilium replacement
 - [ ] Verify node-to-node communication
-- [ ] Check security group rules allow inter-node traffic
+- [x] Check security group rules allow inter-node traffic
 
 ## Cilium Installation & Deployment
-- [ ] Install Cilium using Helm chart on EKS cluster
-- [ ] Configure Cilium for AWS/EKS environment (ENI mode, IP addressing)
-- [ ] Install Cilium CLI tool for testing and troubleshooting
+- [x] Install Cilium using Helm chart on EKS cluster
+- [x] Configure Cilium for AWS/EKS environment (ENI mode, IP addressing)
+- [x] Install Cilium CLI tool for testing and troubleshooting
 - [ ] Verify Cilium pods are running on all nodes
 - [ ] Check Cilium status and agent health
 
