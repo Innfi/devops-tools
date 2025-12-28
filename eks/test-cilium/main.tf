@@ -15,7 +15,7 @@ provider "aws" {
 # VPC Module
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "5.19.0"
 
   name = "${var.project_name}-vpc"
   cidr = var.vpc_cidr
@@ -43,52 +43,73 @@ module "vpc" {
 
   tags = merge(
     var.tags,
-    {
-      Name = "${var.project_name}-vpc"
-    }
   )
 }
 
-# TODO: IAM policies and roles
+# # TODO: IAM policies and roles
+
+module "initial" {
+  source = "./modules/initial"
+
+  vpc_id       = module.vpc.vpc_id
+  inbound_cidr = var.inbound_cidr
+}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 21.0"
+  version = "20.37.1"
 
-  name               = "example"
-  kubernetes_version = "1.33"
-  endpoint_public_access = true
+  cluster_name = "example"
+  cluster_version = "1.33"
+
   enable_cluster_creator_admin_permissions = true
 
-  vpc_id     = module.vpc.id
-  subnet_ids = module.vpc.private_subnets
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = concat(
+    module.vpc.private_subnets,
+    module.vpc.public_subnets
+  )
+
+  # create_kms_key = false
+  cluster_encryption_config = {}
 
   eks_managed_node_groups = {
     example = {
-      ami_type       = "AL2023_x86_64_STANDARD"
       instance_types = ["t3.medium"]
+
+      subnet_ids = module.vpc.private_subnets
+      aws_vpc_security_group_ids = [module.initial.security_group[0].id]
 
       min_size     = 2
       max_size     = 3 
       desired_size = 3
-    }
-  }
 
-  addons = {
-    coredns                = {}
-    eks-pod-identity-agent = {
-      before_compute = true
+      labels = {
+        node_name = "initial-group"
+      }
     }
-    kube-proxy             = {}
-    aws-ebs-csi-driver     = {}
-    # replace vpc-cni with cilium
-    # vpc-cni                = {
-    #   before_compute = true
-    # }
   }
 
   tags = {
     Environment = "dev"
     Terraform   = "true"
   }
+}
+
+module "eks_blueprints_addons" {
+  source  = "aws-ia/eks-blueprints-addons/aws"
+
+  cluster_name = module.eks.cluster_name
+  cluster_endpoint = module.eks.cluster_endpoint
+  cluster_version = module.eks.cluster_version
+  oidc_provider_arn = module.eks.oidc_provider_arn
+
+  eks_addons = {
+    coredns = {}
+    kube-proxy = {}
+    vpc-cni = {}
+    eks-pod-identity-agent = {}
+  }
+
+  enable_aws_load_balancer_controller = true
 }
