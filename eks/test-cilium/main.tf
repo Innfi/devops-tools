@@ -63,6 +63,7 @@ module "eks" {
   cluster_version = "1.33"
 
   enable_cluster_creator_admin_permissions = true
+  cluster_endpoint_public_access = true
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = concat(
@@ -78,7 +79,6 @@ module "eks" {
       instance_types = ["t3.medium"]
 
       subnet_ids = module.vpc.private_subnets
-      aws_vpc_security_group_ids = [module.initial.security_group[0].id]
 
       min_size     = 2
       max_size     = 3 
