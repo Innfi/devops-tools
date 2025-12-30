@@ -11,6 +11,31 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    # This requires the awscli to be installed locally where Terraform is executed
+    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      # This requires the awscli to be installed locally where Terraform is executed
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    }
+  }
+}
 
 # VPC Module
 module "vpc" {
@@ -45,8 +70,6 @@ module "vpc" {
     var.tags,
   )
 }
-
-# # TODO: IAM policies and roles
 
 module "initial" {
   source = "./modules/initial"
@@ -112,4 +135,5 @@ module "eks_blueprints_addons" {
   }
 
   enable_aws_load_balancer_controller = true
+  enable_kube_prometheus_stack = true
 }

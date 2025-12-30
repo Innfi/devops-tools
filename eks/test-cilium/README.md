@@ -5,6 +5,7 @@
 - [x] Install kubectl and verify cluster access
 - [x] Install Helm 3.x or later
 - [x] Familiarize with EKS cluster networking basics
+- [x] set KUBE_CONFIG_PATH
 - [ ] Review Cilium documentation and architecture overview
 
 ## EKS Cluster Preparation
