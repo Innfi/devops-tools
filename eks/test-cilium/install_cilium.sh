@@ -1,7 +1,7 @@
 #!/bin/bash
 # Add Cilium Helm repo
-helm repo add cilium https://helm.cilium.io/
-helm repo update
+# helm repo add cilium https://helm.cilium.io/
+# helm repo update
 
 # Install Cilium for EKS
 helm install cilium cilium/cilium \

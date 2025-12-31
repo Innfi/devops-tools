@@ -129,8 +129,8 @@ module "eks_blueprints_addons" {
 
   eks_addons = {
     coredns = {}
-    kube-proxy = {}
-    vpc-cni = {}
+    # kube-proxy = {}
+    # vpc-cni = {}
     eks-pod-identity-agent = {}
   }
 
