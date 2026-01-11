@@ -10,7 +10,10 @@ import (
 	current "github.com/containernetworking/cni/pkg/types/100"
 	"github.com/containernetworking/cni/pkg/version"
 	"github.com/containernetworking/plugins/pkg/ns"
+	"github.com/coreos/go-iptables/iptables"
 	"github.com/vishvananda/netlink"
+
+	iptableswrapper "test-cni-plugin/pkg/iptableswrapper"
 )
 
 type NetConf struct {
@@ -106,6 +109,16 @@ func cmdCheck(args *skel.CmdArgs) error {
 }
 
 func main() {
+	instance, err := iptableswrapper.NewIPTables(iptables.ProtocolIPv4)
+	if err != nil {
+		fmt.Println("error")
+		return
+	}
+	if instance == nil {
+		fmt.Println("unexpected")
+		return
+	}
+
 	skel.PluginMainFuncs(skel.CNIFuncs{
 		Add:   cmdAdd,
 		Del:   cmdDel,

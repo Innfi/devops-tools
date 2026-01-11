@@ -20,7 +20,7 @@ type IPTablesIface interface {
 }
 
 type ipTables struct {
-	ipt *iptables.Iptables
+	ipt *iptables.IPTables
 }
 
 func NewIPTables(protocol iptables.Protocol) (IPTablesIface, error) {
