@@ -3,7 +3,7 @@ package ipwrapper
 import (
 	"net"
 
-	ip "github.com/containernetworking/plugins/pkg/ip"
+	"github.com/containernetworking/plugins/pkg/ip"
 	"github.com/vishvananda/netlink"
 )
 
