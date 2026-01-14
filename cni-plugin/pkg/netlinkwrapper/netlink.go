@@ -1,6 +1,8 @@
 package netlinkwrapper
 
 import (
+	"fmt"
+
 	"github.com/vishvananda/netlink"
 )
 
@@ -53,4 +55,18 @@ func (*netLink) AddrList(link netlink.Link, family int) ([]netlink.Addr, error) 
 
 func (*netLink) LinkList() ([]netlink.Link, error) {
 	return netlink.LinkList()
+}
+
+func TestNetLink() {
+	netlink := NewNetlink()
+
+	links, err := netlink.LinkList()
+	if err != nil {
+		fmt.Println("err: ", err)
+		return
+	}
+
+	for _, link := range links {
+		fmt.Printf("link: %v\n", link)
+	}
 }

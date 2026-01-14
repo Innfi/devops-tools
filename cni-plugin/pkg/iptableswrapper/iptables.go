@@ -1,6 +1,10 @@
 package iptableswrapper
 
-import "github.com/coreos/go-iptables/iptables"
+import (
+	"fmt"
+
+	"github.com/coreos/go-iptables/iptables"
+)
 
 // TODO: any substitutes?
 
@@ -42,4 +46,25 @@ func (i ipTables) ListChains(table string) ([]string, error) {
 
 func (i ipTables) ChainExists(table, chain string) (bool, error) {
 	return i.ipt.ChainExists(table, chain)
+}
+
+func TestRunIptables() {
+	instance, err := NewIPTables(iptables.ProtocolIPv4)
+	if err != nil {
+		fmt.Println("error")
+		return
+	}
+	if instance == nil {
+		fmt.Println("unexpected")
+		return
+	}
+
+	chains, err := instance.ListChains("filter")
+	if err != nil {
+		fmt.Println("ListChains error: ", err)
+		return
+	}
+	for _, chain := range chains {
+		fmt.Println("chain: ", chain)
+	}
 }

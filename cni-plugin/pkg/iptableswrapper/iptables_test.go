@@ -10,6 +10,9 @@ import (
 
 func TestInit(t *testing.T) {
 	instance, err := NewIPTables(iptables.ProtocolIPv4)
+	if err != nil {
+		fmt.Println(err)
+	}
 	assert.Equal(t, err == nil, true)
 
 	chains, err := instance.ListChains("filter")
