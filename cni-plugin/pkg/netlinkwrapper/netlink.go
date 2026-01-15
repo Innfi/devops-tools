@@ -19,6 +19,10 @@ type NetLink interface {
 
 	AddrList(link netlink.Link, family int) ([]netlink.Addr, error)
 
+	LinkSetUp(link netlink.Link) error
+
+	LinkDel(link netlink.Link) error
+
 	LinkList() ([]netlink.Link, error)
 }
 
@@ -51,6 +55,14 @@ func (*netLink) AddrDel(link netlink.Link, addr *netlink.Addr) error {
 
 func (*netLink) AddrList(link netlink.Link, family int) ([]netlink.Addr, error) {
 	return netlink.AddrList(link, family)
+}
+
+func (*netLink) LinkSetUp(link netlink.Link) error {
+	return netlink.LinkSetUp(link)
+}
+
+func (*netLink) LinkDel(link netlink.Link) error {
+	return netlink.LinkDel(link)
 }
 
 func (*netLink) LinkList() ([]netlink.Link, error) {

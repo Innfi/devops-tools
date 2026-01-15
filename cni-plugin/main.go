@@ -31,7 +31,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 	hostVeth := fmt.Sprintf("veth%s", args.ContainerID[:8])
 	containerVeth := args.IfName
 
-	netns, err := ns.GetNS(args.Netns)
+	netns, err := nswrapper.GetNS(args.Netns)
 	if err != nil {
 		return fmt.Errorf("failed to open netns: %v", err)
 	}
@@ -45,27 +45,27 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return fmt.Errorf("failed to create veth pair: %v", err)
 	}
 
-	containerIface, err := netlink.LinkByName(containerVeth)
+	containerIface, err := netlinkwrapper.LinkByName(containerVeth)
 	if err != nil {
 		return err
 	}
-	if err := netlink.LinkSetNsFd(containerIface, int(netns.Fd())); err != nil {
+	if err := netlinkwrapper.LinkSetNsFd(containerIface, int(netns.Fd())); err != nil {
 		return err
 	}
 
 	if err := netns.Do(func(_ ns.NetNS) error {
-		link, err := netlink.LinkByName(containerVeth)
+		link, err := netlinkwrapper.LinkByName(containerVeth)
 		if err != nil {
 			return err
 		}
 
 		// TODO: replace this code with ipam
-		addr, _ := netlink.ParseAddr("10.244.0.2/24")
-		if err := netlink.AddrAdd(link, addr); err != nil {
+		addr, _ := netlinkwrapper.ParseAddr("10.244.0.2/24")
+		if err := netlinkwrapper.AddrAdd(link, addr); err != nil {
 			return err
 		}
 
-		if err := netlink.LinkSetUp(link); err != nil {
+		if err := netlinkwrapper.LinkSetUp(link); err != nil {
 			return err
 		}
 
@@ -96,12 +96,12 @@ func cmdAdd(args *skel.CmdArgs) error {
 func cmdDel(args *skel.CmdArgs) error {
 	hostVeth := fmt.Sprintf("veth%s", args.ContainerID[:8])
 
-	link, err := netlink.LinkByName(hostVeth)
+	link, err := netlinkwrapper.LinkByName(hostVeth)
 	if err != nil {
 		return err
 	}
 
-	return netlink.LinkDel(link)
+	return netlinkwrapper.LinkDel(link)
 }
 
 func cmdCheck(args *skel.CmdArgs) error {
