@@ -11,6 +11,7 @@ import (
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
 
+	ipam "test-cni-plugin/pkg/ipam"
 	iptableswrapper "test-cni-plugin/pkg/iptableswrapper"
 	netlinkwrapper "test-cni-plugin/pkg/netlinkwrapper"
 	nswrapper "test-cni-plugin/pkg/nswrapper"
@@ -31,7 +32,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 	hostVeth := fmt.Sprintf("veth%s", args.ContainerID[:8])
 	containerVeth := args.IfName
 
-	netns, err := nswrapper.GetNS(args.Netns)
+	netns, err := ns.GetNS(args.Netns)
 	if err != nil {
 		return fmt.Errorf("failed to open netns: %v", err)
 	}
@@ -45,27 +46,32 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return fmt.Errorf("failed to create veth pair: %v", err)
 	}
 
-	containerIface, err := netlinkwrapper.LinkByName(containerVeth)
+	containerIface, err := netlink.LinkByName(containerVeth)
 	if err != nil {
 		return err
 	}
-	if err := netlinkwrapper.LinkSetNsFd(containerIface, int(netns.Fd())); err != nil {
+	if err := netlink.LinkSetNsFd(containerIface, int(netns.Fd())); err != nil {
 		return err
 	}
 
+	ipamInstance := ipam.IPAM{}
+
 	if err := netns.Do(func(_ ns.NetNS) error {
-		link, err := netlinkwrapper.LinkByName(containerVeth)
+		link, err := netlink.LinkByName(containerVeth)
 		if err != nil {
 			return err
 		}
 
 		// TODO: replace this code with ipam
-		addr, _ := netlinkwrapper.ParseAddr("10.244.0.2/24")
-		if err := netlinkwrapper.AddrAdd(link, addr); err != nil {
+		// addr, _ := netlink.ParseAddr("10.244.0.2/24")
+		// if err := netlink.AddrAdd(link, addr); err != nil {
+		// 	return err
+		// }
+		if err := ipamInstance.BindNewAddr(link); err != nil {
 			return err
 		}
 
-		if err := netlinkwrapper.LinkSetUp(link); err != nil {
+		if err := netlink.LinkSetUp(link); err != nil {
 			return err
 		}
 
@@ -83,6 +89,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		IPs: []*current.IPConfig{
 			{
 				Address: net.IPNet{
+					// FIXME: check we can get the new addr outside of goroutine
 					IP:   net.ParseIP("10.244.0.2"),
 					Mask: net.CIDRMask(24, 32),
 				},
@@ -96,12 +103,12 @@ func cmdAdd(args *skel.CmdArgs) error {
 func cmdDel(args *skel.CmdArgs) error {
 	hostVeth := fmt.Sprintf("veth%s", args.ContainerID[:8])
 
-	link, err := netlinkwrapper.LinkByName(hostVeth)
+	link, err := netlink.LinkByName(hostVeth)
 	if err != nil {
 		return err
 	}
 
-	return netlinkwrapper.LinkDel(link)
+	return netlink.LinkDel(link)
 }
 
 func cmdCheck(args *skel.CmdArgs) error {
