@@ -4,22 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"test-cni-plugin/pkg/ipam"
 
 	"github.com/containernetworking/cni/pkg/skel"
 	"github.com/containernetworking/cni/pkg/types"
 	current "github.com/containernetworking/cni/pkg/types/100"
+	"github.com/containernetworking/cni/pkg/version"
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
-
-	ipam "test-cni-plugin/pkg/ipam"
-	iptableswrapper "test-cni-plugin/pkg/iptableswrapper"
-	netlinkwrapper "test-cni-plugin/pkg/netlinkwrapper"
-	nswrapper "test-cni-plugin/pkg/nswrapper"
 )
 
 type NetConf struct {
 	types.NetConf
-	Subnet string `json:"subnet"`
+	Subnet string `json:"subnet"` // is this canonical parameter??
 	Bridge string `json:"bridge"`
 }
 
@@ -29,8 +26,15 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return fmt.Errorf("failed to parse config: %v", err)
 	}
 
+	fmt.Println("conf:", conf)
+	fmt.Println("ipam: ", conf.IPAM)
+	fmt.Println("Subnet:", conf.Subnet)
+	fmt.Println("Bridge:", conf.Bridge)
+
 	hostVeth := fmt.Sprintf("veth%s", args.ContainerID[:8])
 	containerVeth := args.IfName
+
+	fmt.Println("hostVeth: ", hostVeth)
 
 	netns, err := ns.GetNS(args.Netns)
 	if err != nil {
@@ -54,7 +58,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return err
 	}
 
-	ipamInstance := ipam.IPAM{}
+	ipamInstance := ipam.NewIPAM(conf.Subnet)
 
 	if err := netns.Do(func(_ ns.NetNS) error {
 		link, err := netlink.LinkByName(containerVeth)
@@ -118,14 +122,14 @@ func cmdCheck(args *skel.CmdArgs) error {
 func main() {
 	fmt.Println("main")
 
-	iptableswrapper.TestRunIptables()
+	// iptableswrapper.TestRunIptables()
 
-	nswrapper.TestNS()
+	// nswrapper.TestNS()
 
-	netlinkwrapper.TestNetLink()
-	// skel.PluginMainFuncs(skel.CNIFuncs{
-	// 	Add:   cmdAdd,
-	// 	Del:   cmdDel,
-	// 	Check: cmdCheck,
-	// }, version.All, "test-cni v0.0.1")
+	// netlinkwrapper.TestNetLink()
+	skel.PluginMainFuncs(skel.CNIFuncs{
+		Add:   cmdAdd,
+		Del:   cmdDel,
+		Check: cmdCheck,
+	}, version.All, "test-cni v0.0.1")
 }

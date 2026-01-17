@@ -3,7 +3,13 @@ package ipam
 // FIXME: netlinkwrapper or network
 import "github.com/vishvananda/netlink"
 
-type IPAM struct{}
+type IPAM struct {
+	subnet string
+}
+
+func NewIPAM(subnet string) IPAM {
+	return IPAM{subnet: subnet}
+}
 
 func (ipam *IPAM) BindNewAddr(link netlink.Link) error {
 	addr, err := ipam.newAddr()
