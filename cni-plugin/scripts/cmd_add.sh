@@ -17,12 +17,18 @@ cat <<EOF | ./test-cni-plugin
 {
   "cniVersion": "1.0.0",
   "name": "mynet",
-  "type": "test-cni-plugin",
+  "type": "bridge",
   "bridge": "cni0",
   "subnet": "10.244.0.0/24",
   "ipam": {
     "type": "host-local",
-    "subnet": "10.244.0.0/24"
+    "subnet": "10.244.0.0/24",
+    "rangeStart": "10.244.0.4",
+    "rangeEnd": "10.244.0.192",
+    "gateway": "10.244.0.1",
+    "routes": [
+        { "dst": "0.0.0.0/0" }
+    ]
   }
 }
 EOF

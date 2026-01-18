@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"test-cni-plugin/pkg/config"
 	"test-cni-plugin/pkg/ipam"
 
 	"github.com/containernetworking/cni/pkg/skel"
@@ -14,22 +15,14 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
-type NetConf struct {
-	types.NetConf
-	Subnet string `json:"subnet"` // is this canonical parameter??
-	Bridge string `json:"bridge"`
-}
-
 func cmdAdd(args *skel.CmdArgs) error {
-	conf := NetConf{}
+	conf := config.NetConf{}
 	if err := json.Unmarshal(args.StdinData, &conf); err != nil {
 		return fmt.Errorf("failed to parse config: %v", err)
 	}
 
 	fmt.Println("conf:", conf)
 	fmt.Println("ipam: ", conf.IPAM)
-	fmt.Println("Subnet:", conf.Subnet)
-	fmt.Println("Bridge:", conf.Bridge)
 
 	hostVeth := fmt.Sprintf("veth%s", args.ContainerID[:8])
 	containerVeth := args.IfName
@@ -58,7 +51,8 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return err
 	}
 
-	ipamInstance := ipam.NewIPAM(conf.Subnet)
+	ipamInstance := ipam.NewIPAM(conf.IPAM)
+	var addr *netlink.Addr
 
 	if err := netns.Do(func(_ ns.NetNS) error {
 		link, err := netlink.LinkByName(containerVeth)
@@ -66,12 +60,8 @@ func cmdAdd(args *skel.CmdArgs) error {
 			return err
 		}
 
-		// TODO: replace this code with ipam
-		// addr, _ := netlink.ParseAddr("10.244.0.2/24")
-		// if err := netlink.AddrAdd(link, addr); err != nil {
-		// 	return err
-		// }
-		if err := ipamInstance.BindNewAddr(link); err != nil {
+		addr, err = ipamInstance.BindNewAddr(link)
+		if err != nil {
 			return err
 		}
 
@@ -84,6 +74,10 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return err
 	}
 
+	if addr == nil {
+		return fmt.Errorf("addr never made it out of goroutine")
+	}
+
 	// set result
 	result := &current.Result{
 		CNIVersion: conf.CNIVersion,
@@ -93,8 +87,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		IPs: []*current.IPConfig{
 			{
 				Address: net.IPNet{
-					// FIXME: check we can get the new addr outside of goroutine
-					IP:   net.ParseIP("10.244.0.2"),
+					IP:   addr.IP,
 					Mask: net.CIDRMask(24, 32),
 				},
 			},
@@ -131,5 +124,5 @@ func main() {
 		Add:   cmdAdd,
 		Del:   cmdDel,
 		Check: cmdCheck,
-	}, version.All, "test-cni v0.0.1")
+	}, version.All, "test-cni v1.0.0")
 }
