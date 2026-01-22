@@ -11,6 +11,12 @@ type IPAM struct {
 	subnet string
 }
 
+/*
+ * TODO:
+ * Allocate(containerID string) (*netlink.Addr, error)
+ * Release(containerID string) error
+ */
+
 func NewIPAM(config *config.IPAMConfig) IPAM {
 	return IPAM{subnet: config.Subnet}
 }
