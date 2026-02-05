@@ -12,20 +12,9 @@ data "aws_iam_policy_document" "sink_policy" {
     actions = [
         "oam:CreateLink",
         "oam:UpdateLink",
-        "logs:SearchLogGroups",
-        "logs:ListLogGroups",
-        "logs:DescribeLogGroups",
-        "logs:GetLogGroupFields",
-        "logs:FilterLogEvents",
-        "logs:GetLogEvents",
-        "logs:StartQuery",
-        "logs:StopQuery",
-        "logs:GetQueryResults",
-        "logs:ListTagsForResource",
-        // optional: xray
     ]
     resources = [
-      "arn:aws:oam:*:*:sink/${aws_oam_sink.central_sink.id}"
+      aws_oam_sink.central_sink.id
     ]
   }
 }
