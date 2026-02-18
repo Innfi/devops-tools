@@ -1,0 +1,3 @@
+*.o
+ebpf-demo
+counter_*.go
