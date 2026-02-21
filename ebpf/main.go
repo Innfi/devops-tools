@@ -15,6 +15,11 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "nat" {
+		RunNAT(os.Args[2:])
+		return
+	}
+
 	ifaceName := flag.String("iface", "lo", "network interface to attach XDP program")
 	blockIP := flag.String("block", "", "IPv4 address to block (iptables DROP equivalent)")
 	flag.Parse()
