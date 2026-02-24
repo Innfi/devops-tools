@@ -1,3 +1,4 @@
 *.o
 ebpf-demo
-counter_*.go
+*_bpfeb.go
+*_bpfel.go

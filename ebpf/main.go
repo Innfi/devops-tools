@@ -20,6 +20,11 @@ func main() {
 		return
 	}
 
+	if len(os.Args) > 1 && os.Args[1] == "spinlock" {
+		RunSpinlock()
+		return
+	}
+
 	ifaceName := flag.String("iface", "lo", "network interface to attach XDP program")
 	blockIP := flag.String("block", "", "IPv4 address to block (iptables DROP equivalent)")
 	flag.Parse()
