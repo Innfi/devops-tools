@@ -1,0 +1,97 @@
+# promtail-values.yaml
+config:
+  clients:
+    - url: http://loki:3100/loki/api/v1/push
+
+  scrape_configs:
+    # ── Core: scrape all pod logs from node filesystem ──────────────────
+    - job_name: kubernetes-pods
+      pipeline_stages:
+        # Stage 1: detect CRI log format (containerd vs docker)
+        - cri: {}
+
+        # Stage 2: parse structured JSON logs if your app emits them
+        - json:
+            expressions:
+              level: level
+              msg: message
+              trace_id: traceId # useful for OTel trace correlation
+              pod: pod
+
+        # Stage 3: normalize log level label
+        - labels:
+            level:
+            trace_id:
+
+        # Stage 4: drop noisy health-check lines (tune to your app)
+        - drop:
+            expression: ".*(GET /health|GET /metrics|kube-probe).*"
+            drop_counter_reason: health_check_noise
+
+        # Stage 5: set the official timestamp from the log line itself
+        # so ordering is by app time, not ingest time
+        - timestamp:
+            source: time
+            format: RFC3339Nano
+
+      kubernetes_sd_configs:
+        - role: pod
+
+      relabel_configs:
+        # Only scrape pods with stdout logs
+        - source_labels:
+            [__meta_kubernetes_pod_annotation_kubernetes_io_config_hash]
+          action: keep
+          regex: .+
+
+        # Namespace label
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+
+        # App label (from pod label app or app.kubernetes.io/name)
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          target_label: app
+
+        - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+          target_label: app
+          regex: (.+) # only overwrite if present
+
+        # Pod name — essential for multi-pod sort
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+
+        # Container name — useful when pod has sidecars
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
+
+        # Node name — useful for node-level correlation
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          target_label: node
+
+        # Map to actual log file path on node
+        - source_labels:
+            - __meta_kubernetes_pod_uid
+            - __meta_kubernetes_pod_container_name
+          target_label: __path__
+          replacement: /var/log/pods/*$1*/*$2*/*.log
+
+    # ── Optional: scrape system component logs ───────────────────────────
+    - job_name: kubernetes-system
+      static_configs:
+        - targets: [localhost]
+          labels:
+            job: kubernetes-system
+            __path__: /var/log/kubernetes/**/*.log
+
+# Resource limits for the DaemonSet pod
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists # run on tainted nodes too (e.g. GPU nodes)

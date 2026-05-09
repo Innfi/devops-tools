@@ -1,0 +1,38 @@
+loki:
+  auth_enabled: false
+
+  commonConfig:
+    replication_factor: 1
+
+  storage:
+    type: filesystem
+
+  schemaConfig:
+    configs:
+      - from: "2026-05-09"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+
+  limits_config:
+    retention_period: 168h
+    ingestion_rate_mb: 16
+    ingestion_burst_size_mb: 32
+    max_query_series: 10000
+    max_entries_limit_per_query: 50000
+
+  query_range:
+    results_cache:
+      cache:
+        embedded_cache:
+          enabled: true
+          max_size_mb: 256
+
+  ruler:
+    storage:
+      type: local
+      local:
+        directory: /var/loki/rules
