@@ -2,21 +2,21 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "managedByTenantId": { "value": "<관리 테넌트 ID>" },
+    "managedByTenantId": { "value": "baa3e415-2e3d-45b0-8679-5e99662231a6" },
     "authorizations": {
       "value": [
         {
-          "principalId": "<그룹 objectId>",
+          "principalId": "4ab72c75-e1de-4f55-afea-867519b3d56c",
           "principalIdDisplayName": "SRE Collector (Reader)",
           "roleDefinitionId": "acdd72a7-3385-48ef-bd42-f606fba81ae7"
         },
         {
-          "principalId": "<그룹 objectId>",
+          "principalId": "4ab72c75-e1de-4f55-afea-867519b3d56c",
           "principalIdDisplayName": "SRE Collector (Monitoring Reader)",
           "roleDefinitionId": "43d0d8ad-25c7-4714-9337-8ba259a9fe05"
         },
         {
-          "principalId": "<운영자 그룹 objectId>",
+          "principalId": "4ab72c75-e1de-4f55-afea-867519b3d56c",
           "principalIdDisplayName": "SRE Ops (delegation cleanup)",
           "roleDefinitionId": "91c1777a-f3dc-4fae-b103-61d183457e46"
         }
